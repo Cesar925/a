@@ -109,8 +109,32 @@ app.get('/', (c) => {
                         <div class="flex-1">
                             <h2 id="titulo-proceso" class="text-2xl font-bold text-gray-800 mb-4">Sistema de Gestión</h2>
                             
-                            <!-- Filtros -->
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <!-- Selector de Hoja Excel (cuando hay Excel cargado) -->
+                            <div id="selector-hoja-container" class="hidden mb-6">
+                                <div class="bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-600 p-4 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-file-excel text-purple-600 text-2xl mr-3"></i>
+                                            <div>
+                                                <p class="font-semibold text-gray-800">Datos desde Excel cargado</p>
+                                                <p id="info-archivo-tabla" class="text-sm text-gray-600">Sin archivo cargado</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <label class="text-sm font-medium text-gray-700">Seleccionar Hoja:</label>
+                                            <select id="selector-hoja-excel" class="select text-sm min-w-[200px]" onchange="cambiarHojaExcel()">
+                                                <option value="">Seleccionar hoja...</option>
+                                            </select>
+                                            <button onclick="cerrarVistaExcel()" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm transition">
+                                                <i class="fas fa-times mr-1"></i>Cerrar vista Excel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filtros (ocultos cuando se visualiza Excel) -->
+                            <div id="filtros-container" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-600">Año</label>
                                     <select id="filtro-anio" class="select text-sm" onchange="cargarRegistros()">
@@ -832,13 +856,15 @@ app.get('/', (c) => {
           let datosExcel = null;
           let chartVentas = null;
           let chartClientes = null;
+          let excelCargado = null; // Workbook completo
+          let hojaActualExcel = null; // Datos de la hoja actual
+          let modoVistaExcel = false; // true cuando se visualiza Excel directo
           
           // Cargar archivo Excel
           async function cargarExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
             
-            // Mostrar indicador de carga
             const btnCargar = event.target.previousElementSibling || event.target.parentElement.querySelector('button');
             const textoOriginal = btnCargar ? btnCargar.innerHTML : '';
             if (btnCargar) {
@@ -849,49 +875,130 @@ app.get('/', (c) => {
             try {
               const data = await file.arrayBuffer();
               const workbook = XLSX.read(data, { type: 'array' });
+              excelCargado = workbook;
               
-              // Cargar datos a la base de datos
-              const registrosCargados = await cargarDatosDesdeExcel(workbook);
+              const opciones = '1. Ver datos del Excel hoja por hoja\\n2. Importar datos a la base de datos\\n3. Ambos (ver e importar)\\n\\nIngrese 1, 2 o 3:';
+              const opcion = prompt('¿Qué desea hacer con el archivo Excel?\\n\\n' + opciones);
               
-              // Leer hojas para el dashboard
+              if (!opcion || !['1', '2', '3'].includes(opcion.trim())) {
+                alert('Operación cancelada');
+                event.target.value = '';
+                return;
+              }
+              
+              let registrosCargados = 0;
+              
+              if (opcion === '2' || opcion === '3') {
+                registrosCargados = await cargarDatosDesdeExcel(workbook);
+                await cargarRegistros();
+                alert('✅ Importación completada: ' + registrosCargados + ' registros importados');
+              }
+              
+              if (opcion === '1' || opcion === '3') {
+                mostrarVisualizadorExcel(file.name);
+              }
+              
               const sheetNames = workbook.SheetNames;
               let datosResumen = {};
-              
               sheetNames.forEach(sheetName => {
                 const sheet = workbook.Sheets[sheetName];
                 const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                
                 if (sheetName.includes('RESUMEN') || sheetName.includes('Resumen')) {
                   datosResumen = procesarHojaResumen(jsonData);
                 }
               });
-              
               datosExcel = datosResumen;
+              document.getElementById('info-archivo').textContent = file.name + ' - ' + new Date().toLocaleString('es-PE');
               
-              // Actualizar información del archivo
-              document.getElementById('info-archivo').textContent = \`\${file.name} - \${registrosCargados} registros cargados - \${new Date().toLocaleString('es-PE')}\`;
-              
-              // Recargar registros en la tabla
-              await cargarRegistros();
-              
-              // Mostrar dashboard si hay datos de resumen
               if (Object.keys(datosResumen).length > 0 && datosResumen.provincias) {
                 mostrarDashboard();
               }
               
-              alert(\`Excel cargado exitosamente. \${registrosCargados} registros importados.\`);
-              
-              // Reiniciar input
               event.target.value = '';
             } catch (error) {
-              console.error('Error cargando Excel:', error);
-              alert('Error al cargar el archivo Excel. Verifique el formato: ' + error.message);
+              console.error('Error:', error);
+              alert('❌ Error al cargar Excel: ' + error.message);
             } finally {
               if (btnCargar) {
                 btnCargar.disabled = false;
                 btnCargar.innerHTML = textoOriginal;
               }
             }
+          }
+          
+          function mostrarVisualizadorExcel(nombreArchivo) {
+            if (!excelCargado) return;
+            modoVistaExcel = true;
+            document.getElementById('selector-hoja-container').classList.remove('hidden');
+            document.getElementById('filtros-container').classList.add('hidden');
+            document.getElementById('info-archivo-tabla').textContent = nombreArchivo + ' - ' + new Date().toLocaleString('es-PE');
+            
+            const selector = document.getElementById('selector-hoja-excel');
+            selector.innerHTML = '<option value="">Seleccionar hoja...</option>';
+            excelCargado.SheetNames.forEach((sheetName, index) => {
+              const option = document.createElement('option');
+              option.value = index;
+              option.textContent = sheetName;
+              selector.appendChild(option);
+            });
+            
+            if (excelCargado.SheetNames.length > 0) {
+              selector.value = 0;
+              cambiarHojaExcel();
+            }
+          }
+          
+          function cambiarHojaExcel() {
+            const selector = document.getElementById('selector-hoja-excel');
+            const indexHoja = parseInt(selector.value);
+            if (isNaN(indexHoja) || !excelCargado) return;
+            
+            const sheetName = excelCargado.SheetNames[indexHoja];
+            const sheet = excelCargado.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+            
+            hojaActualExcel = { nombre: sheetName, datos: jsonData };
+            renderizarTablaExcel(jsonData);
+          }
+          
+          function renderizarTablaExcel(datos) {
+            const tbody = document.getElementById('tabla-registros');
+            const theadRow = document.querySelector('#seccion-proceso table thead tr');
+            
+            if (!datos || datos.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="20" class="text-center py-8 text-gray-500">Sin datos</td></tr>';
+              return;
+            }
+            
+            const encabezados = datos[0];
+            const filasDatos = datos.slice(1);
+            
+            theadRow.innerHTML = '<th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">#</th>';
+            encabezados.forEach(header => {
+              theadRow.innerHTML += '<th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">' + (header || '-') + '</th>';
+            });
+            
+            tbody.innerHTML = filasDatos.map((fila, index) => {
+              if (!fila || fila.every(cell => !cell)) return '';
+              return '<tr class="hover:bg-blue-50 transition border-b border-gray-200"><td class="px-3 py-2 text-gray-600 border-r border-gray-200 font-medium">' + (index + 1) + '</td>' +
+                fila.map(cell => {
+                  let valor = cell || '';
+                  if (typeof cell === 'number') valor = cell.toLocaleString('es-PE');
+                  return '<td class="px-3 py-2 text-gray-800 border-r border-gray-200">' + valor + '</td>';
+                }).join('') + '</tr>';
+            }).filter(row => row).join('');
+            
+            document.getElementById('titulo-proceso').textContent = '📊 Visualizando: ' + hojaActualExcel.nombre;
+          }
+          
+          function cerrarVistaExcel() {
+            modoVistaExcel = false;
+            excelCargado = null;
+            hojaActualExcel = null;
+            document.getElementById('selector-hoja-container').classList.add('hidden');
+            document.getElementById('filtros-container').classList.remove('hidden');
+            document.getElementById('titulo-proceso').textContent = 'Sistema de Gestión';
+            cargarRegistros();
           }
           
           // Cargar datos desde Excel a la base de datos
