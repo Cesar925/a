@@ -55,6 +55,8 @@ app.get('/', (c) => {
         <title>Sistema de Gestión - Arequipa</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
         <style>
           body { font-family: 'Inter', system-ui, sans-serif; }
           .menu-card {
@@ -74,8 +76,11 @@ app.get('/', (c) => {
           .table { @apply min-w-full divide-y divide-gray-200; }
           .table th { @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50; }
           .table td { @apply px-6 py-4 text-sm text-gray-900; }
-          .modal { @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50; }
-          .modal-content { @apply bg-white rounded-xl p-8 max-w-2xl w-full max-h-screen overflow-y-auto shadow-2xl; }
+          .modal { @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4; }
+          .modal-content { @apply bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl; }
+          @media (max-width: 768px) {
+            .modal-content { @apply p-4 max-w-full; }
+          }
         </style>
     </head>
     <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
@@ -204,19 +209,132 @@ app.get('/', (c) => {
                     </div>
 
                     <!-- Botones de acción (parte inferior) -->
-                    <div class="flex justify-end gap-3 mt-6">
-                        <button onclick="mostrarFormulario('nuevo')" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition text-sm">
-                            <i class="fas fa-plus-circle mr-2"></i>NUEVO
+                    <div class="flex justify-between items-center gap-3 mt-6">
+                        <!-- Botón Cargar Excel (izquierda) -->
+                        <div>
+                            <input type="file" id="input-excel" accept=".xlsx,.xls" class="hidden" onchange="cargarExcel(event)">
+                            <button onclick="document.getElementById('input-excel').click()" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition text-sm">
+                                <i class="fas fa-file-excel mr-2"></i>CARGAR EXCEL
+                            </button>
+                        </div>
+                        
+                        <!-- Botones de acción (derecha) -->
+                        <div class="flex gap-3">
+                            <button onclick="mostrarFormulario('nuevo')" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition text-sm">
+                                <i class="fas fa-plus-circle mr-2"></i>NUEVO
+                            </button>
+                            <button onclick="mostrarFormulario('modifica')" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition text-sm">
+                                <i class="fas fa-edit mr-2"></i>MODIFICA
+                            </button>
+                            <button onclick="confirmarEliminar()" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition text-sm">
+                                <i class="fas fa-trash-alt mr-2"></i>ELIMINA
+                            </button>
+                            <button onclick="generarReporte()" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition text-sm">
+                                <i class="fas fa-file-export mr-2"></i>REPORTE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN DASHBOARD GRÁFICO -->
+            <div id="seccion-dashboard" class="mt-8 hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
+                            Dashboard - Análisis del Excel Cargado
+                        </h2>
+                        <button onclick="cerrarDashboard()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-2xl"></i>
                         </button>
-                        <button onclick="mostrarFormulario('modifica')" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition text-sm">
-                            <i class="fas fa-edit mr-2"></i>MODIFICA
-                        </button>
-                        <button onclick="confirmarEliminar()" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition text-sm">
-                            <i class="fas fa-trash-alt mr-2"></i>ELIMINA
-                        </button>
-                        <button onclick="generarReporte()" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition text-sm">
-                            <i class="fas fa-file-export mr-2"></i>REPORTE
-                        </button>
+                    </div>
+
+                    <!-- Información del archivo -->
+                    <div class="bg-purple-50 border-l-4 border-purple-600 p-4 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-purple-600 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">Archivo cargado:</p>
+                                <p id="info-archivo" class="text-sm text-gray-600">Ninguno</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen General -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90 mb-1">Tamaño de Mercado</p>
+                                    <p id="stat-mercado" class="text-3xl font-bold">0</p>
+                                </div>
+                                <i class="fas fa-globe text-4xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90 mb-1">Potencial Ventas Max</p>
+                                    <p id="stat-ventas-max" class="text-3xl font-bold">0</p>
+                                </div>
+                                <i class="fas fa-chart-line text-4xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90 mb-1">Total Clientes</p>
+                                    <p id="stat-clientes" class="text-3xl font-bold">0</p>
+                                </div>
+                                <i class="fas fa-users text-4xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90 mb-1">Participación Max</p>
+                                    <p id="stat-participacion" class="text-3xl font-bold">0%</p>
+                                </div>
+                                <i class="fas fa-percentage text-4xl opacity-30"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Gráfico de Potencial de Ventas -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">Potencial de Ventas por Región</h3>
+                            <canvas id="chart-ventas"></canvas>
+                        </div>
+
+                        <!-- Gráfico de Número de Clientes -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">Número de Clientes por Región</h3>
+                            <canvas id="chart-clientes"></canvas>
+                        </div>
+
+                        <!-- Tabla Resumen por Provincia -->
+                        <div class="bg-gray-50 rounded-lg p-6 md:col-span-2">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">Resumen por Provincia</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="bg-gray-200">
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Provincia</th>
+                                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Potencial Máximo</th>
+                                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Potencial Mínimo</th>
+                                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Nro. Clientes Max</th>
+                                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Nro. Clientes Min</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-dashboard-resumen" class="bg-white divide-y divide-gray-200">
+                                        <tr><td colspan="5" class="text-center py-4 text-gray-500">Sin datos</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -235,7 +353,7 @@ app.get('/', (c) => {
                 <form id="formulario-registro" class="space-y-4">
                     <input type="hidden" id="form-id">
                     
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-1">Cliente *</label>
                             <select id="form-cliente" class="select" required>
@@ -616,9 +734,496 @@ app.get('/', (c) => {
             }
           }
           
-          // Generar reporte
-          function generarReporte() {
-            alert('Funcionalidad de reporte en desarrollo');
+          // Generar reporte Excel
+          async function generarReporte() {
+            try {
+              if (registrosActuales.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+              }
+              
+              // Crear libro de trabajo
+              const wb = XLSX.utils.book_new();
+              
+              // Preparar datos para exportar
+              const datosExportar = registrosActuales.map(r => ({
+                'ID': r.id,
+                'Cliente': r.cliente_nombre || '-',
+                'Año': r.anio,
+                'Mes': getMesNombre(r.mes),
+                'Provincia': r.provincia_nombre || '-',
+                'Zona': r.zona_nombre || '-',
+                'Cantidad GRS': r.cantidad_grs || 0,
+                'Cantidad RP': r.cantidad_rp || 0,
+                'Potencial Mínimo': r.potencial_minimo || 0,
+                'Potencial Máximo': r.potencial_maximo || 0,
+                'Observaciones': r.observaciones || ''
+              }));
+              
+              // Crear hoja de cálculo
+              const ws = XLSX.utils.json_to_sheet(datosExportar);
+              
+              // Ajustar ancho de columnas
+              const colWidths = [
+                { wch: 8 },  // ID
+                { wch: 30 }, // Cliente
+                { wch: 8 },  // Año
+                { wch: 12 }, // Mes
+                { wch: 20 }, // Provincia
+                { wch: 20 }, // Zona
+                { wch: 12 }, // GRS
+                { wch: 12 }, // RP
+                { wch: 15 }, // Pot Min
+                { wch: 15 }, // Pot Max
+                { wch: 40 }  // Observaciones
+              ];
+              ws['!cols'] = colWidths;
+              
+              // Agregar hoja al libro
+              XLSX.utils.book_append_sheet(wb, ws, procesoActual.nombre.substring(0, 30));
+              
+              // Agregar hoja de resumen si existe
+              if (datosExcel && datosExcel.provincias && datosExcel.provincias.length > 0) {
+                const resumenData = [
+                  ['RESUMEN GENERAL'],
+                  [''],
+                  ['Tamaño de Mercado', datosExcel.mercado],
+                  ['Potencial Ventas Máximo', datosExcel.ventasMax],
+                  ['Potencial Ventas Mínimo', datosExcel.ventasMin],
+                  ['Total Clientes Máximo', datosExcel.clientesMax],
+                  ['Total Clientes Mínimo', datosExcel.clientesMin],
+                  ['Participación Máxima', datosExcel.participacionMax + '%'],
+                  ['Participación Mínima', datosExcel.participacionMin + '%'],
+                  [''],
+                  ['RESUMEN POR PROVINCIA'],
+                  ['Provincia', 'Ventas Max', 'Ventas Min', 'Clientes Max', 'Clientes Min'],
+                  ...datosExcel.provincias.map(p => [
+                    p.nombre,
+                    p.ventasMax,
+                    p.ventasMin,
+                    p.clientesMax,
+                    p.clientesMin
+                  ])
+                ];
+                
+                const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
+                wsResumen['!cols'] = [
+                  { wch: 30 },
+                  { wch: 15 },
+                  { wch: 15 },
+                  { wch: 15 },
+                  { wch: 15 }
+                ];
+                XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+              }
+              
+              // Generar archivo y descargar
+              const nombreArchivo = \`Reporte_\${procesoActual.nombre.replace(/ /g, '_')}_\${new Date().toISOString().split('T')[0]}.xlsx\`;
+              XLSX.writeFile(wb, nombreArchivo);
+              
+              alert('Reporte generado exitosamente');
+            } catch (error) {
+              console.error('Error generando reporte:', error);
+              alert('Error al generar el reporte: ' + error.message);
+            }
+          }
+          
+          // ==================== FUNCIONES EXCEL Y DASHBOARD ====================
+          let datosExcel = null;
+          let chartVentas = null;
+          let chartClientes = null;
+          
+          // Cargar archivo Excel
+          async function cargarExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Mostrar indicador de carga
+            const btnCargar = event.target.previousElementSibling || event.target.parentElement.querySelector('button');
+            const textoOriginal = btnCargar ? btnCargar.innerHTML : '';
+            if (btnCargar) {
+              btnCargar.disabled = true;
+              btnCargar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cargando...';
+            }
+            
+            try {
+              const data = await file.arrayBuffer();
+              const workbook = XLSX.read(data, { type: 'array' });
+              
+              // Cargar datos a la base de datos
+              const registrosCargados = await cargarDatosDesdeExcel(workbook);
+              
+              // Leer hojas para el dashboard
+              const sheetNames = workbook.SheetNames;
+              let datosResumen = {};
+              
+              sheetNames.forEach(sheetName => {
+                const sheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                
+                if (sheetName.includes('RESUMEN') || sheetName.includes('Resumen')) {
+                  datosResumen = procesarHojaResumen(jsonData);
+                }
+              });
+              
+              datosExcel = datosResumen;
+              
+              // Actualizar información del archivo
+              document.getElementById('info-archivo').textContent = \`\${file.name} - \${registrosCargados} registros cargados - \${new Date().toLocaleString('es-PE')}\`;
+              
+              // Recargar registros en la tabla
+              await cargarRegistros();
+              
+              // Mostrar dashboard si hay datos de resumen
+              if (Object.keys(datosResumen).length > 0 && datosResumen.provincias) {
+                mostrarDashboard();
+              }
+              
+              alert(\`Excel cargado exitosamente. \${registrosCargados} registros importados.\`);
+              
+              // Reiniciar input
+              event.target.value = '';
+            } catch (error) {
+              console.error('Error cargando Excel:', error);
+              alert('Error al cargar el archivo Excel. Verifique el formato: ' + error.message);
+            } finally {
+              if (btnCargar) {
+                btnCargar.disabled = false;
+                btnCargar.innerHTML = textoOriginal;
+              }
+            }
+          }
+          
+          // Cargar datos desde Excel a la base de datos
+          async function cargarDatosDesdeExcel(workbook) {
+            const sheetNames = workbook.SheetNames;
+            let registrosCargados = 0;
+            
+            for (const sheetName of sheetNames) {
+              const sheet = workbook.Sheets[sheetName];
+              const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+              
+              // Determinar el tipo de proceso según el nombre de la hoja
+              let proceso_id = 0;
+              if (sheetName.includes('AREQUIPA VIVO')) {
+                proceso_id = 1;
+              } else if (sheetName.includes('PROVINCIAS VIVO')) {
+                proceso_id = 2;
+              } else if (sheetName.includes('AREQUIPA BENEF')) {
+                proceso_id = 3;
+              } else if (sheetName.includes('PROVINCIAS BENEF')) {
+                proceso_id = 4;
+              }
+              
+              if (proceso_id === 0) continue;
+              
+              // Procesar filas (saltar la primera que es encabezado)
+              for (let i = 1; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                if (!row[0]) continue; // Saltar filas vacías
+                
+                try {
+                  // Buscar o crear cliente
+                  const clienteNombre = String(row[6] || '').trim();
+                  if (!clienteNombre) continue;
+                  
+                  let cliente = catalogos.clientes.find(c => c.nombre.toUpperCase() === clienteNombre.toUpperCase());
+                  if (!cliente) {
+                    // Crear nuevo cliente
+                    const tipo_cliente = String(row[5] || 'OTROS');
+                    const nuevoCliente = await axios.post('/catalogos/clientes', {
+                      nombre: clienteNombre,
+                      tipo: tipo_cliente
+                    });
+                    cliente = nuevoCliente.data;
+                    catalogos.clientes.push(cliente);
+                  }
+                  
+                  // Buscar provincia
+                  const provinciaNombre = String(row[2] || '').trim().toUpperCase();
+                  const provincia = catalogos.provincias.find(p => p.nombre.toUpperCase() === provinciaNombre);
+                  
+                  // Preparar datos del registro
+                  const registro = {
+                    proceso_id: proceso_id,
+                    cliente_id: cliente.id,
+                    anio: parseInt(row[0]) || new Date().getFullYear(),
+                    mes: obtenerNumeroMes(row[1]),
+                    provincia_id: provincia ? provincia.id : null,
+                    cantidad_grs: parseFloat(row[7]) || 0,
+                    cantidad_rp: parseFloat(row[8]) || 0,
+                    potencial_minimo: parseFloat(row[proceso_id <= 2 ? 15 : 25]) || 0,
+                    potencial_maximo: parseFloat(row[proceso_id <= 2 ? 16 : 26]) || 0,
+                    observaciones: String(row[row.length - 1] || '')
+                  };
+                  
+                  // Crear registro
+                  const url = proceso_id <= 2 ? '/vivo/crear' : '/beneficiado/crear';
+                  await axios.post(url, registro);
+                  registrosCargados++;
+                  
+                } catch (error) {
+                  console.error('Error procesando fila ' + (i + 1) + ':', error);
+                }
+              }
+            }
+            
+            return registrosCargados;
+          }
+          
+          // Obtener número de mes desde nombre
+          function obtenerNumeroMes(mesTexto) {
+            if (typeof mesTexto === 'number') return mesTexto;
+            const meses = {
+              'ENERO': 1, 'FEBRERO': 2, 'MARZO': 3, 'ABRIL': 4, 'MAYO': 5, 'JUNIO': 6,
+              'JULIO': 7, 'AGOSTO': 8, 'SEPTIEMBRE': 9, 'SETIEMBRE': 9, 'OCTUBRE': 10, 'NOVIEMBRE': 11, 'DICIEMBRE': 12
+            };
+            return meses[String(mesTexto).toUpperCase()] || 1;
+          }
+          
+          // Procesar hoja de resumen
+          function procesarHojaResumen(data) {
+            const resultado = {
+              mercado: 0,
+              ventasMax: 0,
+              ventasMin: 0,
+              clientesMax: 0,
+              clientesMin: 0,
+              participacionMax: 0,
+              participacionMin: 0,
+              provincias: []
+            };
+            
+            // Buscar datos del tamaño de mercado
+            for (let i = 0; i < data.length; i++) {
+              const row = data[i];
+              const cellText = String(row[0] || '').toUpperCase();
+              
+              if (cellText.includes('TAMAÑO') && cellText.includes('MERCADO')) {
+                resultado.mercado = parseFloat(row[2]) || 0;
+              }
+              
+              if (cellText.includes('POTENCIAL') && cellText.includes('VENTAS')) {
+                const nextRow = data[i + 1];
+                if (nextRow) {
+                  resultado.ventasMax = parseFloat(nextRow[1]) || 0;
+                  resultado.ventasMin = parseFloat(nextRow[2]) || 0;
+                }
+              }
+              
+              if (cellText.includes('PARTICIPACION') && cellText.includes('MERCADO')) {
+                const nextRow = data[i + 1];
+                if (nextRow) {
+                  resultado.participacionMax = parseFloat(nextRow[1]) || 0;
+                  resultado.participacionMin = parseFloat(nextRow[2]) || 0;
+                }
+              }
+              
+              // Buscar tabla de provincias
+              if (cellText.includes('AREQUIPA') || cellText.includes('CAMANÁ') || cellText.includes('CAYLLOMA')) {
+                const provincia = {
+                  nombre: row[0],
+                  ventasMax: parseFloat(row[1]) || 0,
+                  ventasMin: parseFloat(row[2]) || 0,
+                  clientesMax: parseFloat(row[1]) || 0,
+                  clientesMin: parseFloat(row[2]) || 0
+                };
+                resultado.provincias.push(provincia);
+              }
+            }
+            
+            // Buscar tabla de número de clientes
+            for (let i = 0; i < data.length; i++) {
+              const row = data[i];
+              const cellText = String(row[0] || '').toUpperCase();
+              
+              if (cellText.includes('NRO') && cellText.includes('CLIENTES')) {
+                const nextRow = data[i + 1];
+                if (nextRow) {
+                  resultado.clientesMax = parseFloat(nextRow[1]) || 0;
+                  resultado.clientesMin = parseFloat(nextRow[2]) || 0;
+                }
+                
+                // Actualizar datos de provincias con clientes
+                for (let j = i + 1; j < Math.min(i + 15, data.length); j++) {
+                  const provRow = data[j];
+                  const provNombre = String(provRow[0] || '').toUpperCase();
+                  
+                  if (provNombre.includes('TOTAL')) break;
+                  
+                  const provincia = resultado.provincias.find(p => 
+                    p.nombre.toUpperCase().includes(provNombre) || 
+                    provNombre.includes(p.nombre.toUpperCase())
+                  );
+                  
+                  if (provincia) {
+                    provincia.clientesMax = parseFloat(provRow[1]) || 0;
+                    provincia.clientesMin = parseFloat(provRow[2]) || 0;
+                  }
+                }
+                break;
+              }
+            }
+            
+            return resultado;
+          }
+          
+          // Mostrar dashboard
+          function mostrarDashboard() {
+            if (!datosExcel) return;
+            
+            // Actualizar estadísticas
+            document.getElementById('stat-mercado').textContent = formatNumber(datosExcel.mercado);
+            document.getElementById('stat-ventas-max').textContent = formatNumber(datosExcel.ventasMax);
+            document.getElementById('stat-clientes').textContent = formatNumber(datosExcel.clientesMax);
+            document.getElementById('stat-participacion').textContent = \`\${datosExcel.participacionMax.toFixed(2)}%\`;
+            
+            // Renderizar tabla de resumen
+            renderizarTablaResumen();
+            
+            // Crear gráficos
+            crearGraficos();
+            
+            // Mostrar sección
+            document.getElementById('seccion-dashboard').classList.remove('hidden');
+            
+            // Scroll suave al dashboard
+            document.getElementById('seccion-dashboard').scrollIntoView({ behavior: 'smooth' });
+          }
+          
+          // Cerrar dashboard
+          function cerrarDashboard() {
+            document.getElementById('seccion-dashboard').classList.add('hidden');
+          }
+          
+          // Renderizar tabla resumen
+          function renderizarTablaResumen() {
+            const tbody = document.getElementById('tabla-dashboard-resumen');
+            
+            if (!datosExcel || datosExcel.provincias.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Sin datos</td></tr>';
+              return;
+            }
+            
+            tbody.innerHTML = datosExcel.provincias.map(prov => \`
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-gray-800">\${prov.nombre}</td>
+                <td class="px-4 py-3 text-right text-gray-700">\${formatNumber(prov.ventasMax)}</td>
+                <td class="px-4 py-3 text-right text-gray-700">\${formatNumber(prov.ventasMin)}</td>
+                <td class="px-4 py-3 text-right text-gray-700">\${formatNumber(prov.clientesMax)}</td>
+                <td class="px-4 py-3 text-right text-gray-700">\${formatNumber(prov.clientesMin)}</td>
+              </tr>
+            \`).join('');
+          }
+          
+          // Crear gráficos
+          function crearGraficos() {
+            if (!datosExcel) return;
+            
+            // Destruir gráficos anteriores si existen
+            if (chartVentas) chartVentas.destroy();
+            if (chartClientes) chartClientes.destroy();
+            
+            const provincias = datosExcel.provincias.map(p => p.nombre);
+            const ventasMax = datosExcel.provincias.map(p => p.ventasMax);
+            const ventasMin = datosExcel.provincias.map(p => p.ventasMin);
+            const clientesMax = datosExcel.provincias.map(p => p.clientesMax);
+            const clientesMin = datosExcel.provincias.map(p => p.clientesMin);
+            
+            // Gráfico de Ventas
+            const ctxVentas = document.getElementById('chart-ventas').getContext('2d');
+            chartVentas = new Chart(ctxVentas, {
+              type: 'bar',
+              data: {
+                labels: provincias,
+                datasets: [
+                  {
+                    label: 'Potencial Máximo',
+                    data: ventasMax,
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1
+                  },
+                  {
+                    label: 'Potencial Mínimo',
+                    data: ventasMin,
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: 'rgb(16, 185, 129)',
+                    borderWidth: 1
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                  legend: {
+                    position: 'bottom'
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: function(value) {
+                        return formatNumber(value);
+                      }
+                    }
+                  }
+                }
+              }
+            });
+            
+            // Gráfico de Clientes
+            const ctxClientes = document.getElementById('chart-clientes').getContext('2d');
+            chartClientes = new Chart(ctxClientes, {
+              type: 'doughnut',
+              data: {
+                labels: provincias,
+                datasets: [{
+                  label: 'Número de Clientes',
+                  data: clientesMax,
+                  backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(249, 115, 22, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(234, 179, 8, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(6, 182, 212, 0.8)',
+                    'rgba(168, 85, 247, 0.8)',
+                    'rgba(34, 197, 94, 0.8)'
+                  ],
+                  borderWidth: 2,
+                  borderColor: '#fff'
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                    labels: {
+                      boxWidth: 12,
+                      font: {
+                        size: 10
+                      }
+                    }
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        const label = context.label || '';
+                        const value = context.parsed || 0;
+                        return \`\${label}: \${formatNumber(value)} clientes\`;
+                      }
+                    }
+                  }
+                }
+              }
+            });
           }
           
           // Inicialización automática al cargar la página

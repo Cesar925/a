@@ -2,350 +2,251 @@
 
 ## 📋 Descripción del Proyecto
 
-Sistema web minimalista e intuitivo para la gestión de datos de ventas y potencial de clientes en Arequipa. **Implementado con arquitectura por capas profesional** (Controllers, Services, Repositories), compatible conceptualmente con Spring Boot, usando Hono + TypeScript y desplegable en Cloudflare Pages.
+Sistema de gestión integral para el control de procesos de venta de pollo en Arequipa y provincias. Permite gestionar datos de clientes, ventas, potenciales y generar reportes en Excel.
 
-### 🎯 Objetivos
-- Gestionar 4 procesos: Vivo Arequipa, Vivo Provincias, Beneficiado Arequipa, Beneficiado Provincia
-- CRUD completo: NUEVO, MODIFICA, ELIMINA, REPORTE
-- Administrar clientes, provincias, zonas y compras GRS
-- Visualizar estadísticas y resúmenes de datos
-- Interfaz minimalista e intuitiva
+## 🌐 URLs del Sistema
 
-## 🌐 URLs de Acceso
+- **Sandbox (Desarrollo)**: https://3000-io76xoehoh5oiv2cq3g44-583b4d74.sandbox.novita.ai
+- **Producción**: (Pendiente de despliegue)
+- **GitHub**: (Pendiente de configuración)
 
-### Desarrollo Local (Sandbox)
-- **Aplicación Web**: https://3000-io76xoehoh5oiv2cq3g44-583b4d74.sandbox.novita.ai
-- **Menú Principal**: 4 tarjetas con gradientes de colores para cada proceso
+## ✨ Características Principales
 
-## 🏗️ Arquitectura por Capas
+### ✅ Funcionalidades Completadas
 
-El proyecto sigue una **arquitectura por capas profesional**, similar a Spring Boot:
+1. **Gestión de Procesos**
+   - Vivo Arequipa
+   - Vivo Provincias
+   - Beneficiado Arequipa
+   - Beneficiado Provincia
 
-```
-src/
-├── controllers/          # Controladores (REST Endpoints)
-│   ├── VivoController.ts
-│   ├── BeneficiadoController.ts
-│   └── CatalogoController.ts
-├── services/             # Lógica de negocio
-│   ├── VivoService.ts
-│   └── BeneficiadoService.ts
-├── repositories/         # Acceso a datos (Data Access Layer)
-│   ├── VivoRepository.ts
-│   ├── BeneficiadoRepository.ts
-│   └── CatalogoRepository.ts
-├── types/                # Tipos TypeScript
-│   └── index.ts
-├── models/               # Modelos de dominio
-├── middleware/           # Middleware personalizado
-└── utils/                # Utilidades
-```
+2. **CRUD de Registros**
+   - ✅ Crear nuevos registros (modal popup responsive)
+   - ✅ Modificar registros existentes
+   - ✅ Eliminar registros (individual y múltiple)
+   - ✅ Visualización en tabla con scroll horizontal
 
-### Capas del Sistema
+3. **Carga Masiva de Datos desde Excel**
+   - ✅ Botón "CARGAR EXCEL" (esquina inferior izquierda)
+   - ✅ Procesa archivos .xlsx y .xls
+   - ✅ Lee múltiples hojas: AREQUIPA VIVO, PROVINCIAS VIVO, AREQUIPA BENEF, PROVINCIAS BENEF
+   - ✅ Crea automáticamente clientes si no existen
+   - ✅ Importa datos a la base de datos D1
+   - ✅ Muestra cantidad de registros importados
 
-#### 1. **Controllers** (Capa de Presentación)
-Maneja las peticiones HTTP y respuestas. Cada controlador está dedicado a un módulo específico:
-- `VivoController`: Endpoints para procesos Vivo (Arequipa y Provincias)
-- `BeneficiadoController`: Endpoints para procesos Beneficiado
-- `CatalogoController`: Endpoints para catálogos (clientes, provincias, etc.)
+4. **Generación de Reportes Excel**
+   - ✅ Botón "REPORTE" genera archivo Excel descargable
+   - ✅ Incluye todos los registros filtrados en la tabla
+   - ✅ Hoja de resumen con estadísticas generales
+   - ✅ Hoja con detalle por provincia
+   - ✅ Formato profesional con columnas ajustadas
 
-#### 2. **Services** (Capa de Lógica de Negocio)
-Contiene la lógica de negocio y validaciones:
-- `VivoService`: Validaciones y operaciones de negocio para Vivo
-- `BeneficiadoService`: Validaciones y operaciones de negocio para Beneficiado
+5. **Dashboard Gráfico Visual**
+   - ✅ Estadísticas principales en cards (Mercado, Ventas, Clientes, Participación)
+   - ✅ Gráfico de barras: Potencial de Ventas por Región
+   - ✅ Gráfico de dona: Distribución de Clientes
+   - ✅ Tabla resumen por provincia
+   - ✅ Responsive y con animaciones
 
-#### 3. **Repositories** (Capa de Acceso a Datos)
-Maneja todas las operaciones con la base de datos:
-- `VivoRepository`: Queries y operaciones CRUD para Vivo
-- `BeneficiadoRepository`: Queries y operaciones CRUD para Beneficiado
-- `CatalogoRepository`: Queries para catálogos
+6. **Sistema de Filtros**
+   - ✅ Filtro por año (2024, 2025, 2026)
+   - ✅ Filtro por mes (Enero - Diciembre)
+   - ✅ Filtro por provincia (cuando aplica)
+   - ✅ Filtro por cliente
 
-### Endpoints API Implementados
-
-#### VIVO (Arequipa y Provincias)
-- `GET /vivo/all` - Obtener todos los registros Vivo
-- `GET /vivo/arequipa` - Obtener registros de Arequipa Vivo
-- `GET /vivo/provincia` - Obtener registros de Provincia Vivo
-- `POST /vivo/crear` - Crear nuevo registro
-- `PUT /vivo/actualizar` - Actualizar registro existente
-- `DELETE /vivo/borrar/{id}` - Eliminar registro por ID
-- `GET /vivo/estadisticas` - Obtener estadísticas agregadas
-
-#### BENEFICIADO (Arequipa y Provincias)
-- `GET /beneficiado/all` - Obtener todos los registros Beneficiado
-- `GET /beneficiado/arequipa` - Obtener registros de Arequipa Beneficiado
-- `GET /beneficiado/provincia` - Obtener registros de Provincia Beneficiado
-- `POST /beneficiado/crear` - Crear nuevo registro
-- `PUT /beneficiado/actualizar` - Actualizar registro existente
-- `DELETE /beneficiado/borrar/{id}` - Eliminar registro por ID
-- `GET /beneficiado/estadisticas` - Obtener estadísticas agregadas
-
-#### CATÁLOGOS
-- `GET /catalogos/procesos` - Obtener todos los procesos
-- `GET /catalogos/provincias` - Obtener todas las provincias
-- `GET /catalogos/zonas` - Obtener todas las zonas
-- `GET /catalogos/tipos-cliente` - Obtener tipos de cliente
-- `GET /catalogos/compras-grs` - Obtener compras GRS
-- `GET /catalogos/clientes` - Obtener todos los clientes
-- `POST /catalogos/clientes` - Crear nuevo cliente
-
-## 🎨 Interfaz de Usuario
-
-### Menú Principal
-**4 tarjetas con gradientes de colores**:
-
-1. **Vivo Arequipa** (Azul) - Proceso 1
-   - Icono: Ciudad
-   - Color: Gradiente azul (from-blue-500 to-blue-700)
-
-2. **Vivo Provincias** (Verde) - Proceso 2
-   - Icono: Mapa
-   - Color: Gradiente verde (from-green-500 to-green-700)
-
-3. **Beneficiado Arequipa** (Morado) - Proceso 3
-   - Icono: Edificio
-   - Color: Gradiente morado (from-purple-500 to-purple-700)
-
-4. **Beneficiado Provincia** (Naranja) - Proceso 4
-   - Icono: Globo
-   - Color: Gradiente naranja (from-orange-500 to-orange-700)
-
-### Funcionalidades por Proceso
-Cada proceso tiene 4 botones principales:
-
-- **NUEVO** (Verde) - Crear nuevo registro
-- **MODIFICA** (Azul) - Modificar registro seleccionado
-- **ELIMINA** (Rojo) - Eliminar registros seleccionados
-- **REPORTE** (Gris) - Generar reporte (en desarrollo)
-
-### Tabla de Registros
-- Checkbox para selección múltiple
-- Columnas: ID, Cliente, Año/Mes, Provincia, GRS, RP, Pot. Min, Pot. Max, Acciones
-- Filtros: Año, Mes, Provincia (solo para procesos de provincia)
-- Acciones rápidas: Editar y Eliminar individual
+7. **Diseño Responsive**
+   - ✅ Modal de formulario adaptable a móviles
+   - ✅ Tabla con scroll horizontal
+   - ✅ Dashboard adaptable a diferentes pantallas
 
 ## 🗄️ Arquitectura de Datos
 
-### Modelos Principales
+### Base de Datos: Cloudflare D1 (SQLite)
 
-1. **Procesos** (4 tipos)
-   - Arequipa Vivo (ID: 1)
-   - Provincia Vivo (ID: 2)
-   - Arequipa Beneficiado (ID: 3)
-   - Provincia Beneficiado (ID: 4)
+**Tablas Principales:**
 
-2. **Provincias** (8 provincias)
-   - Arequipa, Camaná, Castilla, Caylloma, Condesuyos, Islay, La Unión, Caravelí
+1. **clientes**
+   - `id` (INTEGER PRIMARY KEY)
+   - `nombre` (TEXT)
+   - `tipo` (TEXT)
+   - `created_at` (DATETIME)
 
-3. **Tipos de Cliente**
-   - SI (Distribuidores)
-   - NO (Mayoristas)
-   - MD (Mercado)
+2. **provincias**
+   - `id` (INTEGER PRIMARY KEY)
+   - `nombre` (TEXT)
 
-4. **Clientes** (20+ pre-cargados)
-   - Renzo, Avelino, Mercedes, Avicru, Rafael, Matilde, etc.
+3. **procesos**
+   - `id` (INTEGER PRIMARY KEY)
+   - `nombre` (TEXT)
+   - Valores: 1=Vivo Arequipa, 2=Vivo Provincias, 3=Beneficiado Arequipa, 4=Beneficiado Provincia
 
-### Servicios de Almacenamiento
-- **Cloudflare D1 (SQLite)**: Base de datos relacional principal
-- **Local Development**: SQLite local en `.wrangler/state/v3/d1/`
+4. **registros_vivo**
+   - `id` (INTEGER PRIMARY KEY)
+   - `proceso_id` (INTEGER FK → procesos)
+   - `cliente_id` (INTEGER FK → clientes)
+   - `anio` (INTEGER)
+   - `mes` (INTEGER)
+   - `provincia_id` (INTEGER FK → provincias)
+   - `cantidad_grs` (REAL)
+   - `cantidad_rp` (REAL)
+   - `potencial_minimo` (REAL)
+   - `potencial_maximo` (REAL)
+   - `observaciones` (TEXT)
 
-## 💻 Stack Tecnológico
+5. **registros_beneficiado**
+   - Misma estructura que `registros_vivo`
 
-- **Backend**: Hono v4 (framework web ultrarrápido)
-- **Arquitectura**: Por capas (Controllers → Services → Repositories)
-- **Base de Datos**: Cloudflare D1 (SQLite distribuido)
-- **Frontend**: HTML5 + TailwindCSS + Axios
-- **Runtime**: Cloudflare Workers
-- **Build**: Vite
-- **Deployment**: Cloudflare Pages
-- **Lenguaje**: TypeScript
+### Flujo de Datos
 
-## 🚀 Características Implementadas
+```
+Excel → Carga Masiva → D1 Database → API Endpoints → Frontend
+                                   ↓
+                              Dashboard con Gráficos
+```
 
-### ✅ Completadas
-- [x] **Arquitectura por capas completa** (Controllers, Services, Repositories)
-- [x] **Menú principal con 4 procesos** (tarjetas con gradientes)
-- [x] **Endpoints específicos** (/vivo/all, /vivo/arequipa, /vivo/provincia, etc.)
-- [x] **CRUD completo**: Crear, Leer, Actualizar, Eliminar
-- [x] **Base de datos D1** con 8 tablas relacionales
-- [x] **Migraciones y datos semilla**
-- [x] **Interfaz minimalista** con Tailwind CSS
-- [x] **Formularios modales** para NUEVO y MODIFICA
-- [x] **Selección múltiple** para ELIMINA
-- [x] **Filtros dinámicos** por año, mes y provincia
-- [x] **Validaciones** en servicios
-- [x] **Gestión de catálogos** (clientes, provincias, zonas)
-- [x] **Tabla responsive** con acciones rápidas
-- [x] **Botón "Volver al Menú"**
+## 🚀 Guía de Uso
 
-### 🔄 En Desarrollo
-- [ ] Parser de archivos Excel/CSV para carga masiva
-- [ ] Función REPORTE (exportar a Excel)
-- [ ] Gráficos y visualizaciones avanzadas
-- [ ] Búsqueda avanzada de clientes
-- [ ] Autenticación y autorización
+### 1. Gestión Básica de Registros
 
-## 📖 Guía de Uso
+1. **Cambiar de Proceso**: Haz clic en los botones de la derecha (Vivo Arequipa, Vivo Provincias, etc.)
+2. **Filtrar Datos**: Usa los selectores de Año, Mes, Provincia y Cliente
+3. **Crear Registro**: Click en botón verde "NUEVO" → Llenar formulario → Guardar
+4. **Modificar Registro**: Selecciona checkbox → Click en "MODIFICA" → Editar → Guardar
+5. **Eliminar Registro**: Selecciona checkbox(es) → Click en "ELIMINA" → Confirmar
 
-### 1. Menú Principal
-Al acceder a la aplicación, verás 4 tarjetas grandes con gradientes de colores. Haz clic en cualquiera para entrar a ese proceso.
+### 2. Cargar Datos desde Excel
 
-### 2. Gestión de Registros
+1. **Preparar Excel**: Debe tener hojas con nombres:
+   - `AREQUIPA VIVO`
+   - `PROVINCIAS VIVO`
+   - `AREQUIPA BENEF`
+   - `PROVINCIAS BENEF`
 
-#### NUEVO
-1. Haz clic en el botón **NUEVO** (verde)
-2. Completa el formulario modal:
-   - Cliente (requerido)
-   - Año y mes (requerido)
-   - Provincia, zona (opcional)
-   - Cantidades GRS, RP
-   - Potenciales mínimo y máximo
-   - Observaciones
-3. Haz clic en **Guardar**
+2. **Estructura de Columnas Excel**:
+   ```
+   Columna 0: AÑO (2024)
+   Columna 1: MES (ENERO, FEBRERO, etc.)
+   Columna 2: PROVINCIA (AREQUIPA, CAMANÁ, etc.)
+   Columna 3: ZONA
+   Columna 4: COMPRA GRS (SI/NO)
+   Columna 5: TIPO DE CLIENTE
+   Columna 6: NOMBRES (Cliente)
+   Columna 7: GRS (cantidad)
+   Columna 8: RP (cantidad)
+   Columna 15/25: POTENCIAL MINIMO
+   Columna 16/26: POTENCIAL MAXIMO
+   Última columna: OBSERVACIONES
+   ```
 
-#### MODIFICA
-1. **Opción 1**: Selecciona un checkbox en la tabla y haz clic en **MODIFICA** (azul)
-2. **Opción 2**: Haz clic en el icono de editar (lápiz) en la columna Acciones
-3. Modifica los campos necesarios
-4. Haz clic en **Guardar**
+3. **Importar**:
+   - Click en "CARGAR EXCEL" (botón morado, esquina inferior izquierda)
+   - Seleccionar archivo .xlsx o .xls
+   - Esperar mensaje de confirmación con cantidad de registros importados
+   - Los datos aparecerán automáticamente en la tabla
 
-#### ELIMINA
-1. **Opción 1**: Selecciona uno o varios checkboxes y haz clic en **ELIMINA** (rojo)
-2. **Opción 2**: Haz clic en el icono de eliminar (basura) en la columna Acciones
-3. Confirma la eliminación
+### 3. Generar Reportes
 
-#### REPORTE
-*(En desarrollo)* Generará un reporte Excel con los registros filtrados.
+1. **Filtrar Datos** (opcional): Usa los filtros para seleccionar datos específicos
+2. **Click en "REPORTE"**: Botón gris en la esquina inferior derecha
+3. **Descargar**: Se descargará automáticamente un archivo Excel con:
+   - Hoja 1: Datos detallados de los registros
+   - Hoja 2: Resumen con estadísticas generales
 
-### 3. Filtros
-- **Año**: Filtra registros por año
-- **Mes**: Filtra registros por mes
-- **Provincia**: Solo visible en procesos de provincia
+### 4. Ver Dashboard Gráfico
 
-### 4. Volver al Menú
-Haz clic en el botón **"Volver al Menú"** en la esquina superior derecha para regresar al menú principal.
+- Se muestra automáticamente después de cargar un Excel con hoja de resumen
+- Contiene:
+  - 4 Cards con métricas clave
+  - Gráfico de barras comparativo
+  - Gráfico circular de distribución
+  - Tabla detallada por provincia
+- Para cerrar: Click en ✕ en la esquina superior derecha
 
-## 🛠️ Desarrollo Local
+## 🛠️ Stack Tecnológico
 
-### Instalación
+- **Backend**: Hono (Edge Framework)
+- **Frontend**: HTML5 + Tailwind CSS + Vanilla JavaScript
+- **Base de Datos**: Cloudflare D1 (SQLite)
+- **Gráficos**: Chart.js 4.4.0
+- **Excel**: SheetJS (xlsx) 0.18.5
+- **Iconos**: Font Awesome 6.4.0
+- **Deployment**: Cloudflare Pages + Workers
+
+## 📊 Estado del Proyecto
+
+### ✅ Completado
+- Sistema CRUD completo
+- Carga masiva desde Excel con importación a BD
+- Generación de reportes Excel profesionales
+- Dashboard visual con gráficos interactivos
+- Diseño responsive y modal mejorado
+- Sistema de filtros avanzado
+
+### 🔄 En Progreso
+- Ninguno
+
+### 📋 Próximos Pasos Recomendados
+1. Desplegar a Cloudflare Pages (producción)
+2. Configurar dominio personalizado
+3. Agregar autenticación de usuarios
+4. Implementar exportación de dashboard a PDF
+5. Agregar más tipos de gráficos (líneas de tendencia, etc.)
+6. Sistema de notificaciones por email
+
+## 🔧 Comandos de Desarrollo
+
 ```bash
-# Clonar repositorio
-git clone https://github.com/tu-usuario/webapp.git
-cd webapp
-
 # Instalar dependencias
 npm install
 
-# Configurar base de datos local
-npm run db:migrate:local
-npm run db:seed
-```
+# Construir proyecto
+npm run build
 
-### Comandos Disponibles
-```bash
-# Desarrollo
-npm run dev                  # Vite dev server
-npm run dev:sandbox          # Wrangler pages dev
-
-# Build
-npm run build                # Construir proyecto
-
-# Base de datos
-npm run db:migrate:local     # Aplicar migraciones localmente
-npm run db:seed              # Cargar datos semilla
-npm run db:reset             # Resetear base de datos
-
-# PM2 (Sandbox)
+# Iniciar en sandbox (desarrollo)
 pm2 start ecosystem.config.cjs
-pm2 list
+
+# Ver logs
 pm2 logs webapp --nostream
+
+# Reiniciar servicio
 pm2 restart webapp
+
+# Detener servicio
 pm2 delete webapp
 
-# Limpieza
-npm run clean-port           # Limpiar puerto 3000
+# Generar reporte
+npm run deploy
 ```
 
-## 📦 Estructura del Proyecto
-```
-webapp/
-├── src/
-│   ├── controllers/        # Controladores REST
-│   │   ├── VivoController.ts
-│   │   ├── BeneficiadoController.ts
-│   │   └── CatalogoController.ts
-│   ├── services/           # Lógica de negocio
-│   │   ├── VivoService.ts
-│   │   └── BeneficiadoService.ts
-│   ├── repositories/       # Acceso a datos
-│   │   ├── VivoRepository.ts
-│   │   ├── BeneficiadoRepository.ts
-│   │   └── CatalogoRepository.ts
-│   ├── types/              # Tipos TypeScript
-│   │   └── index.ts
-│   ├── models/             # Modelos de dominio
-│   ├── middleware/         # Middleware
-│   ├── utils/              # Utilidades
-│   └── index.tsx           # Aplicación Hono principal
-├── migrations/
-│   └── 0001_initial_schema.sql
-├── public/
-│   └── static/
-├── .wrangler/              # Base de datos local D1
-├── ecosystem.config.cjs    # Configuración PM2
-├── wrangler.jsonc          # Configuración Cloudflare
-├── vite.config.ts          # Configuración Vite
-├── package.json
-├── seed.sql
-└── README.md
-```
+## 📝 Notas Importantes
 
-## 🔐 Estado del Despliegue
+1. **Formato de Fechas**: Los meses en Excel deben estar en español (ENERO, FEBRERO, SETIEMBRE, etc.)
+2. **Clientes Nuevos**: Si un cliente no existe, se crea automáticamente al importar Excel
+3. **Provincias**: Deben coincidir con las registradas en la BD (AREQUIPA, CAMANÁ, CAYLLOMA, etc.)
+4. **Tamaño de Archivo**: El Excel puede tener miles de registros, se procesan por lotes
 
-### Local Development
-- **Estado**: ✅ Activo
-- **URL**: https://3000-io76xoehoh5oiv2cq3g44-583b4d74.sandbox.novita.ai
-- **Base de Datos**: SQLite local (.wrangler/state/v3/d1/)
-- **Última Actualización**: 26/10/2025
+## 🐛 Solución de Problemas
 
-### Producción (Cloudflare Pages)
-- **Estado**: ❌ Pendiente
-- **Requisito**: Configurar CLOUDFLARE_API_TOKEN
+### Error al cargar Excel
+- Verificar que las hojas tengan los nombres correctos
+- Asegurarse de que la primera fila sea el encabezado
+- Revisar que las columnas de año, mes y cliente tengan datos válidos
 
-## 🚀 Próximos Pasos Recomendados
+### No aparecen datos en la tabla
+- Verificar los filtros activos (año, mes, cliente)
+- Revisar en consola del navegador (F12) si hay errores
+- Confirmar que la importación fue exitosa
 
-1. **Implementar parser de Excel/CSV** para carga masiva
-2. **Función REPORTE** - Exportar a Excel con filtros aplicados
-3. **Gráficos con Chart.js** para visualizar tendencias por proceso
-4. **Búsqueda avanzada** con autocompletado
-5. **Autenticación** para proteger datos
-6. **Comparativas** entre procesos (Vivo vs Beneficiado)
-7. **Notificaciones** de éxito/error más elegantes
-8. **Paginación** para tablas con muchos registros
-9. **Auditoría** de cambios (quién modificó qué)
-10. **Desplegar a producción** en Cloudflare Pages
+### El dashboard no se muestra
+- El dashboard solo se muestra si existe una hoja de "RESUMEN" en el Excel
+- Alternativamente, los datos se pueden visualizar desde la tabla y generar reporte
 
-## 🤝 Compatibilidad con Spring Boot
+## 📧 Contacto y Soporte
 
-La arquitectura por capas implementada es **100% compatible** con Spring Boot:
-
-| Spring Boot | Esta App |
-|-------------|----------|
-| @RestController | Controllers (VivoController, etc.) |
-| @Service | Services (VivoService, etc.) |
-| @Repository | Repositories (VivoRepository, etc.) |
-| @Entity | Types (Registro, Cliente, etc.) |
-| JPA/Hibernate | D1 Database Queries |
-| @RequestMapping | app.get(), app.post(), etc. |
-| @Autowired | Constructor injection |
-| application.properties | wrangler.jsonc |
-| Flyway/Liquibase | Migrations directory |
-
-## 📄 Licencia
-
-Este proyecto es privado y confidencial.
+Para reportar problemas o sugerencias, contactar al equipo de desarrollo.
 
 ---
 
-**Última actualización**: 26 de octubre de 2025
-**Versión**: 2.0.0 - Arquitectura por Capas
+**Última actualización**: 2025-01-26
+**Versión**: 1.1.0
+**Estado**: ✅ Producción lista
