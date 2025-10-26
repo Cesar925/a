@@ -90,66 +90,14 @@ app.get('/', (c) => {
                             <p class="text-sm text-gray-600">Arequipa - Control de Procesos</p>
                         </div>
                     </div>
-                    <button id="btn-volver" class="btn btn-secondary hidden" onclick="volverMenu()">
-                        <i class="fas fa-arrow-left mr-2"></i>Volver al Menú
-                    </button>
+                    <!-- Botón volver removido - inicio directo en proceso -->
                 </div>
             </div>
         </header>
 
         <div class="max-w-7xl mx-auto px-6 py-10">
-            <!-- MENÚ PRINCIPAL -->
-            <div id="menu-principal" class="space-y-8">
-                <div class="text-center mb-12">
-                    <h2 class="text-4xl font-bold text-gray-800 mb-4">Seleccione un Proceso</h2>
-                    <p class="text-lg text-gray-600">Elija el tipo de proceso que desea gestionar</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Vivo Arequipa -->
-                    <div class="menu-card bg-gradient-to-br from-blue-500 to-blue-700" onclick="mostrarProceso('vivo-arequipa', 'Vivo Arequipa', 1)">
-                        <div class="flex items-center justify-between mb-6">
-                            <i class="fas fa-city text-6xl opacity-80"></i>
-                            <span class="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">Proceso 1</span>
-                        </div>
-                        <h3 class="text-3xl font-bold mb-3">Vivo Arequipa</h3>
-                        <p class="text-blue-100 text-lg">Gestión de registros de proceso Vivo para la ciudad de Arequipa</p>
-                    </div>
-
-                    <!-- Vivo Provincias -->
-                    <div class="menu-card bg-gradient-to-br from-green-500 to-green-700" onclick="mostrarProceso('vivo-provincia', 'Vivo Provincias', 2)">
-                        <div class="flex items-center justify-between mb-6">
-                            <i class="fas fa-map-marked-alt text-6xl opacity-80"></i>
-                            <span class="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">Proceso 2</span>
-                        </div>
-                        <h3 class="text-3xl font-bold mb-3">Vivo Provincias</h3>
-                        <p class="text-green-100 text-lg">Gestión de registros de proceso Vivo para provincias</p>
-                    </div>
-
-                    <!-- Beneficiado Arequipa -->
-                    <div class="menu-card bg-gradient-to-br from-purple-500 to-purple-700" onclick="mostrarProceso('beneficiado-arequipa', 'Beneficiado Arequipa', 3)">
-                        <div class="flex items-center justify-between mb-6">
-                            <i class="fas fa-building text-6xl opacity-80"></i>
-                            <span class="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">Proceso 3</span>
-                        </div>
-                        <h3 class="text-3xl font-bold mb-3">Beneficiado Arequipa</h3>
-                        <p class="text-purple-100 text-lg">Gestión de registros de proceso Beneficiado para Arequipa</p>
-                    </div>
-
-                    <!-- Beneficiado Provincia -->
-                    <div class="menu-card bg-gradient-to-br from-orange-500 to-orange-700" onclick="mostrarProceso('beneficiado-provincia', 'Beneficiado Provincia', 4)">
-                        <div class="flex items-center justify-between mb-6">
-                            <i class="fas fa-globe text-6xl opacity-80"></i>
-                            <span class="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">Proceso 4</span>
-                        </div>
-                        <h3 class="text-3xl font-bold mb-3">Beneficiado Provincia</h3>
-                        <p class="text-orange-100 text-lg">Gestión de registros de proceso Beneficiado para provincias</p>
-                    </div>
-                </div>
-            </div>
-
             <!-- SECCIÓN DE PROCESO -->
-            <div id="seccion-proceso" class="section-hidden">
+            <div id="seccion-proceso">
                 <div class="bg-white rounded-xl shadow-lg p-8">
                     <!-- Header con selector de procesos y filtros -->
                     <div class="flex justify-between items-start mb-6">
@@ -367,31 +315,7 @@ app.get('/', (c) => {
           };
           let accionFormulario = 'nuevo'; // 'nuevo' o 'modifica'
           
-          // Mostrar proceso específico
-          function mostrarProceso(tipo, nombre, proceso_id) {
-            procesoActual = { tipo, nombre, proceso_id };
-            document.getElementById('menu-principal').classList.add('section-hidden');
-            document.getElementById('seccion-proceso').classList.remove('section-hidden');
-            document.getElementById('btn-volver').classList.remove('hidden');
-            document.getElementById('titulo-proceso').textContent = nombre;
-            
-            // Mostrar filtro de provincia solo para procesos de provincia
-            if (tipo.includes('provincia')) {
-              document.getElementById('filtro-provincia-container').classList.remove('hidden');
-            } else {
-              document.getElementById('filtro-provincia-container').classList.add('hidden');
-            }
-            
-            cargarCatalogos();
-            cargarRegistros();
-          }
-          
-          // Volver al menú principal
-          function volverMenu() {
-            document.getElementById('seccion-proceso').classList.add('section-hidden');
-            document.getElementById('menu-principal').classList.remove('section-hidden');
-            document.getElementById('btn-volver').classList.add('hidden');
-          }
+
           
           // Cambiar proceso sin volver al menú
           function cambiarProceso(tipo, nombre, proceso_id) {
@@ -696,6 +620,29 @@ app.get('/', (c) => {
           function generarReporte() {
             alert('Funcionalidad de reporte en desarrollo');
           }
+          
+          // Inicialización automática al cargar la página
+          window.addEventListener('DOMContentLoaded', () => {
+            // Iniciar directamente en Beneficiado Provincia (proceso 4)
+            procesoActual = {
+              tipo: 'beneficiado-provincia',
+              nombre: 'Beneficiado Provincia',
+              proceso_id: 4
+            };
+            
+            // Mostrar filtro de provincia
+            document.getElementById('filtro-provincia-container').classList.remove('hidden');
+            
+            // Resaltar botón de Beneficiado Provincia como activo
+            const botones = document.querySelectorAll('.proceso-btn');
+            if (botones[3]) { // Cuarto botón (índice 3)
+              botones[3].classList.add('ring-2', 'ring-offset-2', 'ring-orange-500');
+            }
+            
+            // Cargar datos iniciales
+            cargarCatalogos();
+            cargarRegistros();
+          });
         </script>
     </body>
     </html>
