@@ -151,87 +151,124 @@ app.get('/', (c) => {
             <!-- SECCIÓN DE PROCESO -->
             <div id="seccion-proceso" class="section-hidden">
                 <div class="bg-white rounded-xl shadow-lg p-8">
-                    <div class="mb-8">
-                        <h2 id="titulo-proceso" class="text-3xl font-bold text-gray-800 mb-2"></h2>
-                        <p class="text-gray-600">Gestione los registros de este proceso</p>
-                    </div>
-
-                    <!-- Botones de acción -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <button onclick="mostrarFormulario('nuevo')" class="btn btn-success py-4 text-lg">
-                            <i class="fas fa-plus-circle mr-2"></i>NUEVO
-                        </button>
-                        <button onclick="mostrarFormulario('modifica')" class="btn btn-primary py-4 text-lg">
-                            <i class="fas fa-edit mr-2"></i>MODIFICA
-                        </button>
-                        <button onclick="confirmarEliminar()" class="btn btn-danger py-4 text-lg">
-                            <i class="fas fa-trash-alt mr-2"></i>ELIMINA
-                        </button>
-                        <button onclick="generarReporte()" class="btn btn-secondary py-4 text-lg">
-                            <i class="fas fa-file-export mr-2"></i>REPORTE
-                        </button>
-                    </div>
-
-                    <!-- Filtros -->
-                    <div class="bg-gray-50 rounded-lg p-6 mb-6">
-                        <h3 class="text-lg font-semibold mb-4">Filtros de búsqueda</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Año</label>
-                                <select id="filtro-anio" class="select" onchange="cargarRegistros()">
-                                    <option value="">Todos</option>
-                                    <option value="2024" selected>2024</option>
-                                    <option value="2025">2025</option>
-                                </select>
+                    <!-- Header con selector de procesos y filtros -->
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex-1">
+                            <h2 id="titulo-proceso" class="text-2xl font-bold text-gray-800 mb-4">Sistema de Gestión</h2>
+                            
+                            <!-- Filtros -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-600">Año</label>
+                                    <select id="filtro-anio" class="select text-sm" onchange="cargarRegistros()">
+                                        <option value="">Todos</option>
+                                        <option value="2024" selected>2024</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-600">Mes</label>
+                                    <select id="filtro-mes" class="select text-sm" onchange="cargarRegistros()">
+                                        <option value="">Todos</option>
+                                        <option value="1">Enero</option>
+                                        <option value="2">Febrero</option>
+                                        <option value="3">Marzo</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Mayo</option>
+                                        <option value="6">Junio</option>
+                                        <option value="7">Julio</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Septiembre</option>
+                                        <option value="10">Octubre</option>
+                                        <option value="11">Noviembre</option>
+                                        <option value="12">Diciembre</option>
+                                    </select>
+                                </div>
+                                <div id="filtro-provincia-container" class="hidden">
+                                    <label class="block text-xs font-medium mb-1 text-gray-600">Provincia</label>
+                                    <select id="filtro-provincia" class="select text-sm" onchange="cargarRegistros()">
+                                        <option value="">Todas</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-600">Cliente</label>
+                                    <select id="filtro-cliente" class="select text-sm" onchange="cargarRegistros()">
+                                        <option value="">Todos</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Mes</label>
-                                <select id="filtro-mes" class="select" onchange="cargarRegistros()">
-                                    <option value="">Todos</option>
-                                    <option value="1">Enero</option>
-                                    <option value="2">Febrero</option>
-                                    <option value="3">Marzo</option>
-                                    <option value="4">Abril</option>
-                                    <option value="5">Mayo</option>
-                                    <option value="6">Junio</option>
-                                    <option value="7">Julio</option>
-                                    <option value="8">Agosto</option>
-                                    <option value="9">Septiembre</option>
-                                    <option value="10">Octubre</option>
-                                    <option value="11">Noviembre</option>
-                                    <option value="12">Diciembre</option>
-                                </select>
-                            </div>
-                            <div id="filtro-provincia-container" class="hidden">
-                                <label class="block text-sm font-medium mb-2">Provincia</label>
-                                <select id="filtro-provincia" class="select" onchange="cargarRegistros()">
-                                    <option value="">Todas</option>
-                                </select>
+                        </div>
+
+                        <!-- Selector de procesos (esquina superior derecha) -->
+                        <div class="ml-6">
+                            <label class="block text-xs font-medium mb-2 text-gray-600">Proceso Actual</label>
+                            <div class="space-y-2">
+                                <button onclick="cambiarProceso('vivo-arequipa', 'Vivo Arequipa', 1)" 
+                                        class="proceso-btn w-48 px-4 py-2 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-left font-medium transition">
+                                    Vivo Arequipa
+                                </button>
+                                <button onclick="cambiarProceso('vivo-provincia', 'Vivo Provincias', 2)" 
+                                        class="proceso-btn w-48 px-4 py-2 text-sm bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-left font-medium transition">
+                                    Vivo Provincias
+                                </button>
+                                <button onclick="cambiarProceso('beneficiado-arequipa', 'Beneficiado Arequipa', 3)" 
+                                        class="proceso-btn w-48 px-4 py-2 text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-left font-medium transition">
+                                    Beneficiado Arequipa
+                                </button>
+                                <button onclick="cambiarProceso('beneficiado-provincia', 'Beneficiado Provincia', 4)" 
+                                        class="proceso-btn w-48 px-4 py-2 text-sm bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg text-left font-medium transition">
+                                    Beneficiado Provincia
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tabla de registros -->
-                    <div class="overflow-x-auto">
-                        <table class="table">
+                    <!-- Tabla de registros con diseño mejorado -->
+                    <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                        <table class="w-full text-sm">
                             <thead>
-                                <tr>
-                                    <th><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
-                                    <th>ID</th>
-                                    <th>Cliente</th>
-                                    <th>Año/Mes</th>
-                                    <th>Provincia</th>
-                                    <th>GRS</th>
-                                    <th>RP</th>
-                                    <th>Pot. Min</th>
-                                    <th>Pot. Max</th>
-                                    <th>Acciones</th>
+                                <tr class="bg-gray-100 border-b-2 border-gray-300">
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">
+                                        <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                                    </th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">ID</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">Cliente</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">Año</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">Mes</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">Provincia</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">Zona</th>
+                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">GRS</th>
+                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">RP</th>
+                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Renzo</th>
+                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Fafio</th>
+                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Santa Angela</th>
+                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Jorge Pan</th>
+                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Pot. Min</th>
+                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Pot. Max</th>
+                                    <th class="px-3 py-2 text-center text-xs font-semibold text-gray-700">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabla-registros">
-                                <tr><td colspan="10" class="text-center py-8 text-gray-500">Cargando datos...</td></tr>
+                            <tbody id="tabla-registros" class="bg-white divide-y divide-gray-200">
+                                <tr><td colspan="16" class="text-center py-8 text-gray-500">Cargando datos...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Botones de acción (parte inferior) -->
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button onclick="mostrarFormulario('nuevo')" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition text-sm">
+                            <i class="fas fa-plus-circle mr-2"></i>NUEVO
+                        </button>
+                        <button onclick="mostrarFormulario('modifica')" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition text-sm">
+                            <i class="fas fa-edit mr-2"></i>MODIFICA
+                        </button>
+                        <button onclick="confirmarEliminar()" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition text-sm">
+                            <i class="fas fa-trash-alt mr-2"></i>ELIMINA
+                        </button>
+                        <button onclick="generarReporte()" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition text-sm">
+                            <i class="fas fa-file-export mr-2"></i>REPORTE
+                        </button>
                     </div>
                 </div>
             </div>
@@ -356,6 +393,26 @@ app.get('/', (c) => {
             document.getElementById('btn-volver').classList.add('hidden');
           }
           
+          // Cambiar proceso sin volver al menú
+          function cambiarProceso(tipo, nombre, proceso_id) {
+            procesoActual = { tipo, nombre, proceso_id };
+            
+            // Resaltar botón activo
+            document.querySelectorAll('.proceso-btn').forEach(btn => {
+              btn.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-500');
+            });
+            event.target.classList.add('ring-2', 'ring-offset-2', 'ring-blue-500');
+            
+            // Mostrar/ocultar filtro de provincia
+            if (tipo.includes('provincia')) {
+              document.getElementById('filtro-provincia-container').classList.remove('hidden');
+            } else {
+              document.getElementById('filtro-provincia-container').classList.add('hidden');
+            }
+            
+            cargarRegistros();
+          }
+          
           // Cargar catálogos
           async function cargarCatalogos() {
             try {
@@ -371,6 +428,7 @@ app.get('/', (c) => {
               llenarSelect('form-cliente', catalogos.clientes, 'id', 'nombre');
               llenarSelect('form-provincia', catalogos.provincias, 'id', 'nombre');
               llenarSelect('filtro-provincia', catalogos.provincias, 'id', 'nombre');
+              llenarSelect('filtro-cliente', catalogos.clientes, 'id', 'nombre');
             } catch (error) {
               console.error('Error cargando catálogos:', error);
             }
@@ -395,6 +453,7 @@ app.get('/', (c) => {
             const anio = document.getElementById('filtro-anio').value;
             const mes = document.getElementById('filtro-mes').value;
             const provincia_id = document.getElementById('filtro-provincia').value;
+            const cliente_id = document.getElementById('filtro-cliente').value;
             
             let url = '';
             let params = new URLSearchParams();
@@ -417,46 +476,81 @@ app.get('/', (c) => {
             url += '?' + params.toString();
             
             try {
-              const { data } = await axios.get(url);
+              let { data } = await axios.get(url);
+              
+              // Filtrar por cliente si está seleccionado
+              if (cliente_id) {
+                data = data.filter(r => r.cliente_id == cliente_id);
+              }
+              
               registrosActuales = data;
               renderizarTabla(data);
             } catch (error) {
               console.error('Error cargando registros:', error);
               document.getElementById('tabla-registros').innerHTML = 
-                '<tr><td colspan="10" class="text-center py-8 text-red-500">Error al cargar datos</td></tr>';
+                '<tr><td colspan="16" class="text-center py-8 text-red-500">Error al cargar datos</td></tr>';
             }
           }
           
-          // Renderizar tabla
+          // Renderizar tabla con diseño mejorado
           function renderizarTabla(registros) {
             const tbody = document.getElementById('tabla-registros');
             
             if (registros.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-gray-500">No hay registros</td></tr>';
+              tbody.innerHTML = '<tr><td colspan="16" class="text-center py-8 text-gray-500">No hay registros</td></tr>';
               return;
             }
             
-            tbody.innerHTML = registros.map(r => \`
-              <tr class="hover:bg-gray-50">
-                <td><input type="checkbox" class="registro-check" value="\${r.id}"></td>
-                <td>\${r.id}</td>
-                <td>\${r.cliente_nombre || '-'}</td>
-                <td>\${r.anio}/\${r.mes}</td>
-                <td>\${r.provincia_nombre || '-'}</td>
-                <td>\${r.cantidad_grs || 0}</td>
-                <td>\${r.cantidad_rp || 0}</td>
-                <td>\${r.potencial_minimo || 0}</td>
-                <td>\${r.potencial_maximo || 0}</td>
-                <td>
-                  <button onclick="editarRegistro(\${r.id})" class="text-blue-600 hover:text-blue-800 mr-2">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button onclick="eliminarRegistro(\${r.id})" class="text-red-600 hover:text-red-800">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            \`).join('');
+            tbody.innerHTML = registros.map(r => {
+              // Valores por cliente específico (simulado - en realidad deberías tener estos campos en tu BD)
+              const renzo = r.compra_grs_nombre === 'Renzo' ? (r.cantidad_grs || 0) : 0;
+              const fafio = r.compra_grs_nombre === 'Fafio' ? (r.cantidad_grs || 0) : 0;
+              const santaAngela = r.compra_grs_nombre === 'Santa Angela' ? (r.cantidad_grs || 0) : 0;
+              const jorgePan = r.compra_grs_nombre === 'Jorge Pan' ? (r.cantidad_grs || 0) : 0;
+              
+              return \`
+                <tr class="hover:bg-blue-50 transition border-b border-gray-200">
+                  <td class="px-3 py-2 border-r border-gray-200">
+                    <input type="checkbox" class="registro-check" value="\${r.id}">
+                  </td>
+                  <td class="px-3 py-2 text-gray-800 border-r border-gray-200">\${r.id}</td>
+                  <td class="px-3 py-2 text-gray-800 font-medium border-r border-gray-200">\${r.cliente_nombre || '-'}</td>
+                  <td class="px-3 py-2 text-gray-800 border-r border-gray-200">\${r.anio}</td>
+                  <td class="px-3 py-2 text-gray-800 border-r border-gray-200">\${getMesNombre(r.mes)}</td>
+                  <td class="px-3 py-2 text-gray-800 border-r border-gray-200">\${r.provincia_nombre || '-'}</td>
+                  <td class="px-3 py-2 text-gray-800 border-r border-gray-200">\${r.zona_nombre || '-'}</td>
+                  <td class="px-3 py-2 text-right text-gray-800 font-semibold border-r border-gray-200">\${formatNumber(r.cantidad_grs)}</td>
+                  <td class="px-3 py-2 text-right text-gray-800 font-semibold border-r border-gray-200">\${formatNumber(r.cantidad_rp)}</td>
+                  <td class="px-3 py-2 text-right text-blue-700 border-r border-gray-200">\${formatNumber(renzo)}</td>
+                  <td class="px-3 py-2 text-right text-green-700 border-r border-gray-200">\${formatNumber(fafio)}</td>
+                  <td class="px-3 py-2 text-right text-purple-700 border-r border-gray-200">\${formatNumber(santaAngela)}</td>
+                  <td class="px-3 py-2 text-right text-orange-700 border-r border-gray-200">\${formatNumber(jorgePan)}</td>
+                  <td class="px-3 py-2 text-right text-gray-600 border-r border-gray-200">\${formatNumber(r.potencial_minimo)}</td>
+                  <td class="px-3 py-2 text-right text-gray-600 border-r border-gray-200">\${formatNumber(r.potencial_maximo)}</td>
+                  <td class="px-3 py-2 text-center">
+                    <button onclick="editarRegistro(\${r.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarRegistro(\${r.id})" class="text-red-600 hover:text-red-800" title="Eliminar">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              \`;
+            }).join('');
+          }
+          
+          // Formatear números
+          function formatNumber(value) {
+            if (!value || value === 0) return '0';
+            return parseFloat(value).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+          }
+          
+          // Obtener nombre del mes
+          function getMesNombre(mes) {
+            const meses = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            return meses[parseInt(mes)] || mes;
           }
           
           // Toggle select all
