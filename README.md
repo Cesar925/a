@@ -26,7 +26,16 @@ Sistema de gestión integral para el control de procesos de venta de pollo en Ar
    - ✅ Eliminar registros (individual y múltiple)
    - ✅ Visualización en tabla con scroll horizontal
 
-3. **Carga Masiva de Datos desde Excel**
+3. **🆕 Visualizador de Excel Hoja por Hoja**
+   - ✅ **Ver datos completos del Excel sin importar**
+   - ✅ Selector de hojas (dropdown)
+   - ✅ Navegación entre hojas instantánea
+   - ✅ Muestra estructura original del Excel
+   - ✅ Tabla dinámica con todos los datos
+   - ✅ Formato de números con separadores
+   - ✅ 3 opciones: Ver, Importar, o Ambos
+
+4. **Carga Masiva de Datos desde Excel**
    - ✅ Botón "CARGAR EXCEL" (esquina inferior izquierda)
    - ✅ Procesa archivos .xlsx y .xls
    - ✅ Lee múltiples hojas: AREQUIPA VIVO, PROVINCIAS VIVO, AREQUIPA BENEF, PROVINCIAS BENEF
@@ -114,37 +123,64 @@ Excel → Carga Masiva → D1 Database → API Endpoints → Frontend
 4. **Modificar Registro**: Selecciona checkbox → Click en "MODIFICA" → Editar → Guardar
 5. **Eliminar Registro**: Selecciona checkbox(es) → Click en "ELIMINA" → Confirmar
 
-### 2. Cargar Datos desde Excel
+### 2. 🆕 Visualizador de Excel (Hoja por Hoja)
 
-1. **Preparar Excel**: Debe tener hojas con nombres:
-   - `AREQUIPA VIVO`
-   - `PROVINCIAS VIVO`
-   - `AREQUIPA BENEF`
-   - `PROVINCIAS BENEF`
+**Cuando quieras ver los datos del Excel sin modificar la base de datos:**
 
-2. **Estructura de Columnas Excel**:
-   ```
-   Columna 0: AÑO (2024)
-   Columna 1: MES (ENERO, FEBRERO, etc.)
-   Columna 2: PROVINCIA (AREQUIPA, CAMANÁ, etc.)
-   Columna 3: ZONA
-   Columna 4: COMPRA GRS (SI/NO)
-   Columna 5: TIPO DE CLIENTE
-   Columna 6: NOMBRES (Cliente)
-   Columna 7: GRS (cantidad)
-   Columna 8: RP (cantidad)
-   Columna 15/25: POTENCIAL MINIMO
-   Columna 16/26: POTENCIAL MAXIMO
-   Última columna: OBSERVACIONES
-   ```
+1. Click en **"CARGAR EXCEL"** (botón morado, inferior izquierda)
+2. Seleccionar archivo Excel
+3. Elegir **Opción 1**: "Ver datos del Excel hoja por hoja"
+4. Aparecerá:
+   - Selector de hojas (dropdown) en la parte superior
+   - Tabla con datos completos de la hoja seleccionada
+   - Botón "Cerrar vista Excel" para volver
+5. Cambiar entre hojas usando el selector
+6. Ver todos los datos con formato original
+7. Click en "Cerrar vista Excel" cuando termines
 
-3. **Importar**:
-   - Click en "CARGAR EXCEL" (botón morado, esquina inferior izquierda)
-   - Seleccionar archivo .xlsx o .xls
-   - Esperar mensaje de confirmación con cantidad de registros importados
-   - Los datos aparecerán automáticamente en la tabla
+**Ventajas:**
+- ✅ No modifica la base de datos
+- ✅ Visualización rápida y completa
+- ✅ Ideal para revisar datos antes de importar
+- ✅ Navegación fácil entre hojas
 
-### 3. Generar Reportes
+### 3. Cargar Datos desde Excel (Importar a BD)
+
+**Cuando quieras importar datos a la base de datos:**
+
+1. Click en **"CARGAR EXCEL"**
+2. Seleccionar archivo Excel
+3. Elegir opción:
+   - **Opción 2**: "Importar datos a la base de datos" (solo importar)
+   - **Opción 3**: "Ambos (ver e importar)" (importar y visualizar)
+4. Esperar mensaje: "✅ Importación completada: X registros importados"
+5. Los datos estarán disponibles en la tabla con filtros
+
+**Preparación del Excel:**
+
+Debe tener hojas con nombres:
+- `AREQUIPA VIVO`
+- `PROVINCIAS VIVO`
+- `AREQUIPA BENEF`
+- `PROVINCIAS BENEF`
+
+**Estructura de Columnas:**
+```
+Columna 0: AÑO (2024)
+Columna 1: MES (ENERO, FEBRERO, SETIEMBRE, etc.)
+Columna 2: PROVINCIA (AREQUIPA, CAMANÁ, etc.)
+Columna 3: ZONA
+Columna 4: COMPRA GRS (SI/NO)
+Columna 5: TIPO DE CLIENTE
+Columna 6: NOMBRES (Cliente)
+Columna 7: GRS (cantidad)
+Columna 8: RP (cantidad)
+Columna 15/25: POTENCIAL MINIMO
+Columna 16/26: POTENCIAL MAXIMO
+Última columna: OBSERVACIONES
+```
+
+### 4. Generar Reportes
 
 1. **Filtrar Datos** (opcional): Usa los filtros para seleccionar datos específicos
 2. **Click en "REPORTE"**: Botón gris en la esquina inferior derecha
@@ -152,7 +188,7 @@ Excel → Carga Masiva → D1 Database → API Endpoints → Frontend
    - Hoja 1: Datos detallados de los registros
    - Hoja 2: Resumen con estadísticas generales
 
-### 4. Ver Dashboard Gráfico
+### 5. Ver Dashboard Gráfico
 
 - Se muestra automáticamente después de cargar un Excel con hoja de resumen
 - Contiene:
@@ -161,6 +197,12 @@ Excel → Carga Masiva → D1 Database → API Endpoints → Frontend
   - Gráfico circular de distribución
   - Tabla detallada por provincia
 - Para cerrar: Click en ✕ en la esquina superior derecha
+
+---
+
+## 📖 Documentación Adicional
+
+- **[GUIA_VISUALIZADOR_EXCEL.md](./GUIA_VISUALIZADOR_EXCEL.md)**: Guía completa del visualizador de Excel con casos de uso y ejemplos
 
 ## 🛠️ Stack Tecnológico
 
@@ -176,11 +218,13 @@ Excel → Carga Masiva → D1 Database → API Endpoints → Frontend
 
 ### ✅ Completado
 - Sistema CRUD completo
+- 🆕 **Visualizador de Excel hoja por hoja** (sin importar a BD)
 - Carga masiva desde Excel con importación a BD
 - Generación de reportes Excel profesionales
 - Dashboard visual con gráficos interactivos
 - Diseño responsive y modal mejorado
 - Sistema de filtros avanzado
+- Selector de hojas con navegación instantánea
 
 ### 🔄 En Progreso
 - Ninguno
@@ -248,5 +292,28 @@ Para reportar problemas o sugerencias, contactar al equipo de desarrollo.
 ---
 
 **Última actualización**: 2025-01-26
-**Versión**: 1.1.0
+**Versión**: 1.2.0
 **Estado**: ✅ Producción lista
+
+---
+
+## 🎯 Cambios Recientes (v1.2.0)
+
+### 🆕 Nuevas Funcionalidades
+
+1. **Visualizador de Excel Interactivo**
+   - Ver datos completos sin importar a BD
+   - Selector de hojas con dropdown
+   - Navegación instantánea entre hojas
+   - Mantiene estructura original del Excel
+
+2. **Opciones de Carga Flexible**
+   - Opción 1: Solo visualizar
+   - Opción 2: Solo importar
+   - Opción 3: Visualizar e importar
+
+3. **Interfaz Mejorada**
+   - Banner informativo con selector de hojas
+   - Botón "Cerrar vista Excel"
+   - Tabla dinámica con formato mejorado
+   - Título actualizado según hoja activa
