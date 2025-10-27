@@ -78,6 +78,12 @@ app.get('/', (c) => {
           .table td { @apply px-6 py-4 text-sm text-gray-900; }
           .modal { @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4; }
           .modal-content { @apply bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl; }
+          .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
           @media (max-width: 768px) {
             .modal-content { @apply p-4 max-w-full; }
           }
@@ -103,38 +109,15 @@ app.get('/', (c) => {
         <div class="max-w-7xl mx-auto px-6 py-10">
             <!-- SECCIÓN DE PROCESO -->
             <div id="seccion-proceso">
-                <div class="bg-white rounded-xl shadow-lg p-8">
-                    <!-- Header con selector de procesos y filtros -->
-                    <div class="flex justify-between items-start mb-6">
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-8">
+                    <!-- Header responsive -->
+                    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6 mb-6">
+                        <!-- Sección izquierda: Título y Filtros -->
                         <div class="flex-1">
-                            <h2 id="titulo-proceso" class="text-2xl font-bold text-gray-800 mb-4">Sistema de Gestión</h2>
+                            <h2 id="titulo-proceso" class="text-xl md:text-2xl font-bold text-gray-800 mb-4">Sistema de Gestión</h2>
                             
-                            <!-- Selector de Hoja Excel (cuando hay Excel cargado) -->
-                            <div id="selector-hoja-container" class="hidden mb-6">
-                                <div class="bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-600 p-4 rounded-lg">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-file-excel text-purple-600 text-2xl mr-3"></i>
-                                            <div>
-                                                <p class="font-semibold text-gray-800">Datos desde Excel cargado</p>
-                                                <p id="info-archivo-tabla" class="text-sm text-gray-600">Sin archivo cargado</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <label class="text-sm font-medium text-gray-700">Seleccionar Hoja:</label>
-                                            <select id="selector-hoja-excel" class="select text-sm min-w-[200px]" onchange="cambiarHojaExcel()">
-                                                <option value="">Seleccionar hoja...</option>
-                                            </select>
-                                            <button onclick="cerrarVistaExcel()" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm transition">
-                                                <i class="fas fa-times mr-1"></i>Cerrar vista Excel
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- Filtros (ocultos cuando se visualiza Excel) -->
-                            <div id="filtros-container" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <div id="filtros-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-600">Año</label>
                                     <select id="filtro-anio" class="select text-sm" onchange="cargarRegistros()">
@@ -177,26 +160,48 @@ app.get('/', (c) => {
                             </div>
                         </div>
 
-                        <!-- Selector de procesos (esquina superior derecha) -->
-                        <div class="ml-6">
+                        <!-- Sección derecha: Proceso Actual -->
+                        <div class="lg:ml-6 w-full lg:w-auto mt-4 lg:mt-0">
                             <label class="block text-xs font-medium mb-2 text-gray-600">Proceso Actual</label>
-                            <div class="space-y-2">
+                            
+                            <!-- Selector de Procesos (base de datos) -->
+                            <div id="selector-procesos" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-1 gap-2">
                                 <button onclick="cambiarProceso('vivo-arequipa', 'Vivo Arequipa', 1)" 
-                                        class="proceso-btn w-48 px-4 py-2 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-left font-medium transition">
+                                        class="proceso-btn w-full lg:w-48 px-3 py-2 text-xs md:text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-left font-medium transition">
                                     Vivo Arequipa
                                 </button>
                                 <button onclick="cambiarProceso('vivo-provincia', 'Vivo Provincias', 2)" 
-                                        class="proceso-btn w-48 px-4 py-2 text-sm bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-left font-medium transition">
+                                        class="proceso-btn w-full lg:w-48 px-3 py-2 text-xs md:text-sm bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-left font-medium transition">
                                     Vivo Provincias
                                 </button>
                                 <button onclick="cambiarProceso('beneficiado-arequipa', 'Beneficiado Arequipa', 3)" 
-                                        class="proceso-btn w-48 px-4 py-2 text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-left font-medium transition">
+                                        class="proceso-btn w-full lg:w-48 px-3 py-2 text-xs md:text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-left font-medium transition">
                                     Beneficiado Arequipa
                                 </button>
                                 <button onclick="cambiarProceso('beneficiado-provincia', 'Beneficiado Provincia', 4)" 
-                                        class="proceso-btn w-48 px-4 py-2 text-sm bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg text-left font-medium transition">
+                                        class="proceso-btn w-full lg:w-48 px-3 py-2 text-xs md:text-sm bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg text-left font-medium transition">
                                     Beneficiado Provincia
                                 </button>
+                            </div>
+
+                            <!-- Selector de Hojas Excel (cuando hay Excel cargado) -->
+                            <div id="selector-hoja-container" class="hidden">
+                                <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 p-3 md:p-4 rounded-lg w-full">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i class="fas fa-file-excel text-purple-600 text-lg md:text-xl"></i>
+                                        <p class="font-semibold text-gray-800 text-xs md:text-sm">Excel Cargado</p>
+                                    </div>
+                                    <p id="info-archivo-tabla" class="text-xs text-gray-600 mb-3 break-words line-clamp-2">Sin archivo</p>
+                                    
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Seleccionar Hoja:</label>
+                                    <select id="selector-hoja-excel" class="w-full px-3 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white mb-2" onchange="cambiarHojaExcel()">
+                                        <option value="">Seleccionar hoja...</option>
+                                    </select>
+                                    
+                                    <button onclick="cerrarVistaExcel()" class="w-full px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-xs md:text-sm font-medium transition">
+                                        <i class="fas fa-times mr-1"></i>Cerrar Vista Excel
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -232,61 +237,61 @@ app.get('/', (c) => {
                         </table>
                     </div>
 
-                    <!-- Botones de acción (parte inferior) -->
-                    <div class="flex justify-between items-center gap-3 mt-6">
+                    <!-- Botones de acción (parte inferior) - Responsive -->
+                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-6">
                         <!-- Botón Cargar Excel (izquierda) -->
-                        <div>
+                        <div class="w-full sm:w-auto">
                             <input type="file" id="input-excel" accept=".xlsx,.xls" class="hidden" onchange="cargarExcel(event)">
-                            <button onclick="document.getElementById('input-excel').click()" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition text-sm">
+                            <button onclick="document.getElementById('input-excel').click()" class="w-full sm:w-auto px-4 md:px-6 py-2 md:py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition text-xs md:text-sm">
                                 <i class="fas fa-file-excel mr-2"></i>CARGAR EXCEL
                             </button>
                         </div>
                         
                         <!-- Botones de acción (derecha) -->
-                        <div class="flex gap-3">
-                            <button onclick="mostrarFormulario('nuevo')" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition text-sm">
-                                <i class="fas fa-plus-circle mr-2"></i>NUEVO
+                        <div class="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+                            <button onclick="mostrarFormulario('nuevo')" class="px-3 md:px-6 py-2 md:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition text-xs md:text-sm">
+                                <i class="fas fa-plus-circle mr-1 md:mr-2"></i>NUEVO
                             </button>
-                            <button onclick="mostrarFormulario('modifica')" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition text-sm">
-                                <i class="fas fa-edit mr-2"></i>MODIFICA
+                            <button onclick="mostrarFormulario('modifica')" class="px-3 md:px-6 py-2 md:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition text-xs md:text-sm">
+                                <i class="fas fa-edit mr-1 md:mr-2"></i>MODIFICA
                             </button>
-                            <button onclick="confirmarEliminar()" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition text-sm">
-                                <i class="fas fa-trash-alt mr-2"></i>ELIMINA
+                            <button onclick="confirmarEliminar()" class="px-3 md:px-6 py-2 md:py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition text-xs md:text-sm">
+                                <i class="fas fa-trash-alt mr-1 md:mr-2"></i>ELIMINA
                             </button>
-                            <button onclick="generarReporte()" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition text-sm">
-                                <i class="fas fa-file-export mr-2"></i>REPORTE
+                            <button onclick="generarReporte()" class="px-3 md:px-6 py-2 md:py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition text-xs md:text-sm">
+                                <i class="fas fa-file-export mr-1 md:mr-2"></i>REPORTE
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- SECCIÓN DASHBOARD GRÁFICO -->
+            <!-- SECCIÓN DASHBOARD GRÁFICO - Responsive -->
             <div id="seccion-dashboard" class="mt-8 hidden">
-                <div class="bg-white rounded-xl shadow-lg p-8">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-8">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <h2 class="text-lg md:text-2xl font-bold text-gray-800">
                             <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
-                            Dashboard - Análisis del Excel Cargado
+                            Dashboard - Análisis del Excel
                         </h2>
                         <button onclick="cerrarDashboard()" class="text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-times text-2xl"></i>
+                            <i class="fas fa-times text-xl md:text-2xl"></i>
                         </button>
                     </div>
 
                     <!-- Información del archivo -->
-                    <div class="bg-purple-50 border-l-4 border-purple-600 p-4 mb-6">
+                    <div class="bg-purple-50 border-l-4 border-purple-600 p-3 md:p-4 mb-6">
                         <div class="flex items-center">
-                            <i class="fas fa-info-circle text-purple-600 mr-3 text-xl"></i>
+                            <i class="fas fa-info-circle text-purple-600 mr-2 md:mr-3 text-lg md:text-xl"></i>
                             <div>
-                                <p class="font-semibold text-gray-800">Archivo cargado:</p>
-                                <p id="info-archivo" class="text-sm text-gray-600">Ninguno</p>
+                                <p class="font-semibold text-gray-800 text-sm md:text-base">Archivo cargado:</p>
+                                <p id="info-archivo" class="text-xs md:text-sm text-gray-600">Ninguno</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Resumen General -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <!-- Resumen General - Responsive Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
                         <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white">
                             <div class="flex items-center justify-between">
                                 <div>
@@ -929,10 +934,16 @@ app.get('/', (c) => {
           function mostrarVisualizadorExcel(nombreArchivo) {
             if (!excelCargado) return;
             modoVistaExcel = true;
+            
+            // Mostrar selector de hojas y ocultar elementos normales
             document.getElementById('selector-hoja-container').classList.remove('hidden');
+            document.getElementById('selector-procesos').classList.add('hidden');
             document.getElementById('filtros-container').classList.add('hidden');
+            
+            // Actualizar información del archivo
             document.getElementById('info-archivo-tabla').textContent = nombreArchivo + ' - ' + new Date().toLocaleString('es-PE');
             
+            // Llenar selector con hojas
             const selector = document.getElementById('selector-hoja-excel');
             selector.innerHTML = '<option value="">Seleccionar hoja...</option>';
             excelCargado.SheetNames.forEach((sheetName, index) => {
@@ -942,6 +953,7 @@ app.get('/', (c) => {
               selector.appendChild(option);
             });
             
+            // Seleccionar primera hoja
             if (excelCargado.SheetNames.length > 0) {
               selector.value = 0;
               cambiarHojaExcel();
@@ -995,9 +1007,14 @@ app.get('/', (c) => {
             modoVistaExcel = false;
             excelCargado = null;
             hojaActualExcel = null;
+            
+            // Mostrar elementos normales y ocultar selector de hojas
             document.getElementById('selector-hoja-container').classList.add('hidden');
+            document.getElementById('selector-procesos').classList.remove('hidden');
             document.getElementById('filtros-container').classList.remove('hidden');
             document.getElementById('titulo-proceso').textContent = 'Sistema de Gestión';
+            
+            // Recargar tabla normal
             cargarRegistros();
           }
           
