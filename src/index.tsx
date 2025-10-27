@@ -525,6 +525,11 @@ app.get('/', (c) => {
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        
+        <!-- API Configuration for PHP Backend -->
+        <script src="/static/api-config.js"></script>
+        <script src="/static/api-adapter.js"></script>
+        
         <script>
           // Estado global
           let procesoActual = {

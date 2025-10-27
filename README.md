@@ -70,6 +70,24 @@ Sistema de gestión integral para el control de procesos de venta de pollo en Ar
 
 ## 🗄️ Arquitectura de Datos
 
+### 🆕 Doble Modo de Base de Datos
+
+El sistema ahora soporta **DOS modos de operación**:
+
+1. **Modo Cloudflare D1** (Original)
+   - Base de datos SQLite distribuida en la nube
+   - Deployment en Cloudflare Pages/Workers
+   - Ideal para producción escalable
+
+2. **🆕 Modo PHP + MySQL** (Nuevo)
+   - Conexión a base de datos MySQL local (phpMyAdmin)
+   - Backend PHP con endpoints REST
+   - Ideal para desarrollo local y control total de datos
+
+**Para usar el modo PHP + MySQL, ver:** [GUIA_INSTALACION_PHP_API.md](./GUIA_INSTALACION_PHP_API.md)
+
+---
+
 ### Base de Datos: Cloudflare D1 (SQLite)
 
 **Tablas Principales:**
@@ -215,16 +233,29 @@ Excel → Carga Masiva → D1 Database → API Endpoints → Frontend
 
 - **[GUIA_VISUALIZADOR_EXCEL.md](./GUIA_VISUALIZADOR_EXCEL.md)**: Guía completa del visualizador de Excel con casos de uso y ejemplos
 - **[ENDPOINTS_EXPORTACION.md](./ENDPOINTS_EXPORTACION.md)**: Documentación de endpoints de exportación Excel
+- **🆕 [GUIA_INSTALACION_PHP_API.md](./GUIA_INSTALACION_PHP_API.md)**: Guía completa para conectar a MySQL/phpMyAdmin
+- **🆕 [LEEME_RAPIDO.txt](./LEEME_RAPIDO.txt)**: Instalación rápida en 6 pasos
+- **🆕 [api-php/README_API.md](./api-php/README_API.md)**: Documentación técnica de la API PHP
 
 ## 🛠️ Stack Tecnológico
 
+### Modo Cloudflare (Original)
 - **Backend**: Hono (Edge Framework)
 - **Frontend**: HTML5 + Tailwind CSS + Vanilla JavaScript
 - **Base de Datos**: Cloudflare D1 (SQLite)
+- **Deployment**: Cloudflare Pages + Workers
+
+### 🆕 Modo PHP + MySQL (Nuevo)
+- **Backend**: PHP 7.4+ con PDO
+- **API**: REST endpoints con JSON
+- **Base de Datos**: MySQL 5.7+ / MariaDB (phpMyAdmin)
+- **Servidor**: Apache (XAMPP/WAMP)
+- **Frontend**: HTML5 + Tailwind CSS + JavaScript (sin cambios)
+
+### Común a Ambos Modos
 - **Gráficos**: Chart.js 4.4.0
 - **Excel**: SheetJS (xlsx) 0.18.5
 - **Iconos**: Font Awesome 6.4.0
-- **Deployment**: Cloudflare Pages + Workers
 
 ## 📊 Estado del Proyecto
 
@@ -251,6 +282,8 @@ Excel → Carga Masiva → D1 Database → API Endpoints → Frontend
 
 ## 🔧 Comandos de Desarrollo
 
+### Modo Cloudflare D1 (Original)
+
 ```bash
 # Instalar dependencias
 npm install
@@ -270,9 +303,30 @@ pm2 restart webapp
 # Detener servicio
 pm2 delete webapp
 
-# Generar reporte
+# Desplegar a producción
 npm run deploy
 ```
+
+### 🆕 Modo PHP + MySQL (Nuevo)
+
+```bash
+# 1. Instalar API PHP en XAMPP/WAMP
+INSTALAR_API_PHP.bat
+
+# 2. Configurar base de datos
+CONFIGURAR_API.bat
+
+# 3. Construir frontend
+npm run build
+
+# 4. Ejecutar frontend
+ejecutar.bat
+
+# 5. Probar API (navegador)
+http://localhost/api-php/test.php
+```
+
+**📖 Ver guía completa:** [GUIA_INSTALACION_PHP_API.md](./GUIA_INSTALACION_PHP_API.md)
 
 ## 📝 Notas Importantes
 
@@ -304,12 +358,62 @@ Para reportar problemas o sugerencias, contactar al equipo de desarrollo.
 ---
 
 **Última actualización**: 2025-01-27
-**Versión**: 1.4.0
-**Estado**: ✅ Producción lista
+**Versión**: 1.5.0
+**Estado**: ✅ Producción lista + 🆕 Modo PHP+MySQL
 
 ---
 
-## 🎯 Cambios Recientes (v1.4.0)
+## 🎯 Cambios Recientes (v1.5.0)
+
+### 🆕 Integración con MySQL/phpMyAdmin (NUEVO)
+
+1. **Backend PHP con API REST**
+   - ✅ 7 archivos PHP para endpoints completos
+   - ✅ Conexión nativa a MySQL/MariaDB
+   - ✅ CRUD completo: Create, Read, Update, Delete
+   - ✅ Endpoints para filtros y estadísticas
+   - ✅ Importación masiva desde Excel
+   - ✅ CORS configurado para frontend
+
+2. **Scripts de Instalación Automática**
+   - ✅ `INSTALAR_API_PHP.bat`: Copia automática a XAMPP/WAMP
+   - ✅ `CONFIGURAR_API.bat`: Configurador interactivo de base de datos
+   - ✅ Detección automática de XAMPP/WAMP
+   - ✅ Backup automático de configuración
+
+3. **Documentación Completa**
+   - ✅ `GUIA_INSTALACION_PHP_API.md`: Guía paso a paso con capturas
+   - ✅ `LEEME_RAPIDO.txt`: Instalación en 6 pasos
+   - ✅ `api-php/README_API.md`: Documentación técnica de endpoints
+   - ✅ `api-php/test.php`: Página de diagnóstico
+
+4. **Adaptador de API para Frontend**
+   - ✅ `api-config.js`: Configuración de URL y modo
+   - ✅ `api-adapter.js`: Wrapper para compatibilidad
+   - ✅ Sin cambios en código del frontend existente
+   - ✅ Conversión automática de formatos (D1 ↔ MySQL)
+
+5. **Estructura de Tablas MySQL**
+   - ✅ `captura_pantalla_vivo`: Tabla para datos vivo
+   - ✅ `captura_pantalla_beneficiado`: Tabla para datos beneficiado
+   - ✅ Script SQL incluido: `estructura_tablas.sql`
+   - ✅ Índices optimizados para consultas rápidas
+
+**Arquitectura:**
+```
+Frontend (Navegador) → API PHP (localhost) → MySQL (phpMyAdmin)
+```
+
+**Ventajas del Modo PHP+MySQL:**
+- ✅ Control total sobre los datos
+- ✅ Acceso directo vía phpMyAdmin
+- ✅ Backups fáciles de la base de datos
+- ✅ Sin límites de Cloudflare
+- ✅ Ideal para desarrollo local
+
+---
+
+## 🎯 Cambios Anteriores (v1.4.0)
 
 ### 🚀 Importación Automática de Excel (NUEVO)
 
