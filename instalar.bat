@@ -4,6 +4,12 @@ echo   Sistema de Gestion - Instalacion
 echo ========================================
 echo.
 
+REM Cambiar al directorio del script
+cd /d "%~dp0"
+
+echo Directorio actual: %CD%
+echo.
+
 echo Verificando Node.js...
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
@@ -13,6 +19,16 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 echo OK - Node.js instalado
+
+echo.
+echo Verificando package.json...
+if not exist package.json (
+    echo ERROR: package.json no encontrado en: %CD%
+    echo Asegurate de ejecutar este script desde la carpeta del proyecto
+    pause
+    exit /b 1
+)
+echo OK - package.json encontrado
 
 echo.
 echo Instalando dependencias...
