@@ -1148,11 +1148,11 @@ app.get('/', (c) => {
                 else if (h.includes('ZONA')) colMap.zona = idx;
                 else if (h.includes('DISTRITO')) colMap.distrito = idx;
                 else if (h.includes('TIPO') && h.includes('CLIENTE')) colMap.tipo_cliente = idx;
-                else if (h.includes('CLIENTE') && !h.includes('TIPO')) colMap.cliente = idx;
-                else if (h.includes('GRS') || h.includes('CANTIDAD') && h.includes('GRS')) colMap.cantidad_grs = idx;
-                else if (h.includes('RP') || h.includes('CANTIDAD') && h.includes('RP')) colMap.cantidad_rp = idx;
-                else if (h.includes('POTENCIAL') && (h.includes('MIN') || h.includes('MÍNIMO'))) colMap.pot_min = idx;
-                else if (h.includes('POTENCIAL') && (h.includes('MAX') || h.includes('MÁXIMO'))) colMap.pot_max = idx;
+                else if (h.includes('NOMBRES') || (h.includes('CLIENTE') && !h.includes('TIPO'))) colMap.cliente = idx;
+                else if (h === 'GRS' || (h.includes('GRS') && !h.includes('COMPRA') && !h.includes('VIVO'))) colMap.cantidad_grs = idx;
+                else if (h === 'RP' || (h.includes('RP') && !h.includes('COMPRA'))) colMap.cantidad_rp = idx;
+                else if (h.includes('POTENCIAL') && (h.includes('MIN') || h.includes('MÍNIMO')) && !h.includes('CONDIC')) colMap.pot_min = idx;
+                else if (h.includes('POTENCIAL') && (h.includes('MAX') || h.includes('MÁXIMO')) && !h.includes('CONDIC')) colMap.pot_max = idx;
                 else if (h.includes('OBSERV')) colMap.observaciones = idx;
               });
               
