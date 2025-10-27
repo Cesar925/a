@@ -457,6 +457,12 @@ app.get('/', (c) => {
                                 <option value="12">Diciembre</option>
                             </select>
                         </div>
+                        <div id="form-provincia-container">
+                            <label class="block text-sm font-medium mb-1">Provincia</label>
+                            <select id="form-provincia" class="select">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
                         </div>
                     </div>
                     
