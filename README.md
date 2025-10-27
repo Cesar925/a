@@ -203,6 +203,7 @@ Columna 16/26: POTENCIAL MAXIMO
 ## 📖 Documentación Adicional
 
 - **[GUIA_VISUALIZADOR_EXCEL.md](./GUIA_VISUALIZADOR_EXCEL.md)**: Guía completa del visualizador de Excel con casos de uso y ejemplos
+- **[ENDPOINTS_EXPORTACION.md](./ENDPOINTS_EXPORTACION.md)**: Documentación de endpoints de exportación Excel
 
 ## 🛠️ Stack Tecnológico
 
@@ -291,29 +292,40 @@ Para reportar problemas o sugerencias, contactar al equipo de desarrollo.
 
 ---
 
-**Última actualización**: 2025-01-26
-**Versión**: 1.2.0
+**Última actualización**: 2025-01-27
+**Versión**: 1.3.0
 **Estado**: ✅ Producción lista
 
 ---
 
-## 🎯 Cambios Recientes (v1.2.0)
+## 🎯 Cambios Recientes (v1.3.0)
 
 ### 🆕 Nuevas Funcionalidades
 
-1. **Visualizador de Excel Interactivo**
-   - Ver datos completos sin importar a BD
-   - Selector de hojas con dropdown
-   - Navegación instantánea entre hojas
-   - Mantiene estructura original del Excel
+1. **Eliminada Columna de Acciones**
+   - Tabla más limpia sin botones de editar/eliminar por fila
+   - Uso de botones NUEVO, MODIFICA, ELIMINA en parte inferior
+   - Mejor rendimiento en tablas grandes
 
-2. **Opciones de Carga Flexible**
-   - Opción 1: Solo visualizar
-   - Opción 2: Solo importar
-   - Opción 3: Visualizar e importar
+2. **Endpoints de Exportación Excel**
+   - **GET /vivo/arequipa/excel**: Exporta datos de Vivo Arequipa
+   - **GET /vivo/provincia/excel**: Exporta datos de Vivo Provincia
+   - **GET /beneficiado/arequipa/excel**: Exporta datos de Beneficiado Arequipa
+   - **GET /beneficiado/provincia/excel**: Exporta datos de Beneficiado Provincia
+   - Retornan datos en formato JSON desde la base de datos
+   - Ver [ENDPOINTS_EXPORTACION.md](./ENDPOINTS_EXPORTACION.md) para más detalles
 
-3. **Interfaz Mejorada**
-   - Banner informativo con selector de hojas
-   - Botón "Cerrar vista Excel"
-   - Tabla dinámica con formato mejorado
-   - Título actualizado según hoja activa
+3. **Carga de Excel vía API**
+   - Ahora los datos se envían al backend mediante endpoints
+   - Mejor validación y control de errores
+   - Creación automática de clientes si no existen
+   - Mensajes de progreso durante la importación
+
+4. **Reportes desde Backend**
+   - Función `generarReporte()` ahora obtiene datos desde la base de datos
+   - Datos siempre actualizados y completos
+   - Sin límites de paginación en reportes
+
+### 📖 Documentación Adicional
+
+- **[ENDPOINTS_EXPORTACION.md](./ENDPOINTS_EXPORTACION.md)**: Documentación completa de endpoints de exportación
