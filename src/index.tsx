@@ -112,6 +112,19 @@ app.get('/', (c) => {
           @media (max-width: 768px) {
             .modal-content { @apply p-4 max-w-full; }
           }
+          
+          /* Estilos para filas seleccionables */
+          .tabla-fila-seleccionable {
+            cursor: pointer;
+            transition: background-color 0.2s;
+          }
+          .tabla-fila-seleccionable:hover {
+            background-color: #EBF5FF !important;
+          }
+          .tabla-fila-seleccionada {
+            background-color: #DBEAFE !important;
+            border-left: 3px solid #3B82F6;
+          }
         </style>
     </head>
     <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
@@ -142,7 +155,7 @@ app.get('/', (c) => {
                             <h2 id="titulo-proceso" class="text-xl md:text-2xl font-bold text-gray-800 mb-4">Sistema de Gestión</h2>
                             
                             <!-- Filtros (ocultos cuando se visualiza Excel) -->
-                            <div id="filtros-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                            <div id="filtros-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-600">Año</label>
                                     <select id="filtro-anio" class="select text-sm" onchange="cargarRegistros()">
@@ -183,32 +196,33 @@ app.get('/', (c) => {
                                     </select>
                                 </div>
                             </div>
+                            
+                            <!-- Selector de Procesos (movido debajo de filtros) -->
+                            <div id="selector-procesos-container" class="mt-4">
+                                <label class="block text-xs font-medium mb-2 text-gray-600">Proceso Actual</label>
+                                <div id="selector-procesos" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    <button onclick="cambiarProceso('vivo-arequipa', 'Vivo Arequipa', 1)" 
+                                            class="proceso-btn w-full px-3 py-2 text-xs md:text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-left font-medium transition">
+                                        Vivo Arequipa
+                                    </button>
+                                    <button onclick="cambiarProceso('vivo-provincia', 'Vivo Provincias', 2)" 
+                                            class="proceso-btn w-full px-3 py-2 text-xs md:text-sm bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-left font-medium transition">
+                                        Vivo Provincias
+                                    </button>
+                                    <button onclick="cambiarProceso('beneficiado-arequipa', 'Beneficiado Arequipa', 3)" 
+                                            class="proceso-btn w-full px-3 py-2 text-xs md:text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-left font-medium transition">
+                                        Beneficiado Arequipa
+                                    </button>
+                                    <button onclick="cambiarProceso('beneficiado-provincia', 'Beneficiado Provincia', 4)" 
+                                            class="proceso-btn w-full px-3 py-2 text-xs md:text-sm bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg text-left font-medium transition">
+                                        Beneficiado Provincia
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Sección derecha: Proceso Actual -->
+                        <!-- Sección derecha: Selector Excel (cuando hay Excel cargado) -->
                         <div class="lg:ml-6 w-full lg:w-auto mt-4 lg:mt-0">
-                            <label class="block text-xs font-medium mb-2 text-gray-600">Proceso Actual</label>
-                            
-                            <!-- Selector de Procesos (base de datos) -->
-                            <div id="selector-procesos" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-1 gap-2">
-                                <button onclick="cambiarProceso('vivo-arequipa', 'Vivo Arequipa', 1)" 
-                                        class="proceso-btn w-full lg:w-48 px-3 py-2 text-xs md:text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-left font-medium transition">
-                                    Vivo Arequipa
-                                </button>
-                                <button onclick="cambiarProceso('vivo-provincia', 'Vivo Provincias', 2)" 
-                                        class="proceso-btn w-full lg:w-48 px-3 py-2 text-xs md:text-sm bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-left font-medium transition">
-                                    Vivo Provincias
-                                </button>
-                                <button onclick="cambiarProceso('beneficiado-arequipa', 'Beneficiado Arequipa', 3)" 
-                                        class="proceso-btn w-full lg:w-48 px-3 py-2 text-xs md:text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-left font-medium transition">
-                                    Beneficiado Arequipa
-                                </button>
-                                <button onclick="cambiarProceso('beneficiado-provincia', 'Beneficiado Provincia', 4)" 
-                                        class="proceso-btn w-full lg:w-48 px-3 py-2 text-xs md:text-sm bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg text-left font-medium transition">
-                                    Beneficiado Provincia
-                                </button>
-                            </div>
-
                             <!-- Selector de Hojas Excel (cuando hay Excel cargado) -->
                             <div id="selector-hoja-container" class="hidden">
                                 <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 p-3 md:p-4 rounded-lg w-full">
@@ -236,9 +250,6 @@ app.get('/', (c) => {
                         <table class="min-w-full text-sm" style="table-layout: fixed; width: 1600px;">
                             <thead>
                                 <tr class="bg-gray-100 border-b-2 border-gray-300">
-                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">
-                                        <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
-                                    </th>
                                     <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">ID</th>
                                     <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">Cliente</th>
                                     <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">Año</th>
@@ -256,7 +267,7 @@ app.get('/', (c) => {
                                 </tr>
                             </thead>
                             <tbody id="tabla-registros" class="bg-white divide-y divide-gray-200">
-                                <tr><td colspan="15" class="text-center py-8 text-gray-500">Cargando datos...</td></tr>
+                                <tr><td colspan="14" class="text-center py-8 text-gray-500">Cargando datos...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -621,7 +632,7 @@ app.get('/', (c) => {
             } catch (error) {
               console.error('Error cargando registros:', error);
               document.getElementById('tabla-registros').innerHTML = 
-                '<tr><td colspan="15" class="text-center py-8 text-red-500">Error al cargar datos</td></tr>';
+                '<tr><td colspan="14" class="text-center py-8 text-red-500">Error al cargar datos</td></tr>';
             }
           }
           
@@ -630,7 +641,7 @@ app.get('/', (c) => {
             const tbody = document.getElementById('tabla-registros');
             
             if (registros.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="15" class="text-center py-8 text-gray-500">No hay registros</td></tr>';
+              tbody.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-gray-500">No hay registros</td></tr>';
               return;
             }
             
@@ -642,10 +653,7 @@ app.get('/', (c) => {
               const jorgePan = r.compra_grs_nombre === 'Jorge Pan' ? (r.cantidad_grs || 0) : 0;
               
               return \`
-                <tr class="hover:bg-blue-50 transition border-b border-gray-200">
-                  <td class="px-3 py-2 border-r border-gray-200">
-                    <input type="checkbox" class="registro-check" value="\${r.id}">
-                  </td>
+                <tr class="tabla-fila-seleccionable border-b border-gray-200" data-id="\${r.id}" onclick="toggleFilaSeleccion(this, \${r.id})">
                   <td class="px-3 py-2 text-gray-800 border-r border-gray-200">\${r.id}</td>
                   <td class="px-3 py-2 text-gray-800 font-medium border-r border-gray-200">\${r.cliente_nombre || '-'}</td>
                   <td class="px-3 py-2 text-gray-800 border-r border-gray-200">\${r.anio}</td>
@@ -678,11 +686,30 @@ app.get('/', (c) => {
             return meses[parseInt(mes)] || mes;
           }
           
-          // Toggle select all
-          function toggleSelectAll() {
-            const checks = document.querySelectorAll('.registro-check');
-            const selectAll = document.getElementById('select-all').checked;
-            checks.forEach(check => check.checked = selectAll);
+          // Variable global para almacenar IDs de filas seleccionadas
+          let filasSeleccionadas = [];
+          
+          // Seleccionar/deseleccionar fila haciendo clic
+          function toggleFilaSeleccion(fila, id) {
+            const index = filasSeleccionadas.indexOf(id);
+            
+            if (index > -1) {
+              // Deseleccionar
+              filasSeleccionadas.splice(index, 1);
+              fila.classList.remove('tabla-fila-seleccionada');
+            } else {
+              // Seleccionar
+              filasSeleccionadas.push(id);
+              fila.classList.add('tabla-fila-seleccionada');
+            }
+          }
+          
+          // Limpiar selección de todas las filas
+          function limpiarSeleccion() {
+            document.querySelectorAll('.tabla-fila-seleccionada').forEach(fila => {
+              fila.classList.remove('tabla-fila-seleccionada');
+            });
+            filasSeleccionadas = [];
           }
           
           // Mostrar formulario
@@ -695,16 +722,15 @@ app.get('/', (c) => {
               document.getElementById('form-id').value = '';
               document.getElementById('modal-formulario').classList.remove('hidden');
             } else if (accion === 'modifica') {
-              const checks = document.querySelectorAll('.registro-check:checked');
-              if (checks.length === 0) {
-                alert('Seleccione un registro para modificar');
+              if (filasSeleccionadas.length === 0) {
+                alert('Seleccione un registro para modificar haciendo clic sobre una fila');
                 return;
               }
-              if (checks.length > 1) {
+              if (filasSeleccionadas.length > 1) {
                 alert('Seleccione solo un registro para modificar');
                 return;
               }
-              editarRegistro(parseInt(checks[0].value));
+              editarRegistro(filasSeleccionadas[0]);
             }
           }
           
@@ -786,16 +812,16 @@ app.get('/', (c) => {
           
           // Confirmar eliminación
           function confirmarEliminar() {
-            const checks = document.querySelectorAll('.registro-check:checked');
-            if (checks.length === 0) {
-              alert('Seleccione al menos un registro para eliminar');
+            if (filasSeleccionadas.length === 0) {
+              alert('Seleccione al menos un registro para eliminar haciendo clic sobre una fila');
               return;
             }
             
-            if (confirm(\`¿Está seguro de eliminar \${checks.length} registro(s)?\`)) {
-              checks.forEach(async check => {
-                await eliminarRegistro(parseInt(check.value));
+            if (confirm(\`¿Está seguro de eliminar \${filasSeleccionadas.length} registro(s)?\`)) {
+              filasSeleccionadas.forEach(async id => {
+                await eliminarRegistro(id);
               });
+              limpiarSeleccion();
             }
           }
           
