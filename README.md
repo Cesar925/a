@@ -144,41 +144,52 @@ Excel → Carga Masiva → D1 Database → API Endpoints → Frontend
 - ✅ Ideal para revisar datos antes de importar
 - ✅ Navegación fácil entre hojas
 
-### 3. Cargar Datos desde Excel (Importar a BD)
+### 3. 🚀 Importación Automática desde Excel (NUEVO)
 
-**Cuando quieras importar datos a la base de datos:**
+**Importación 100% automática sin opciones:**
 
 1. Click en **"CARGAR EXCEL"**
 2. Seleccionar archivo Excel
-3. Elegir opción:
-   - **Opción 2**: "Importar datos a la base de datos" (solo importar)
-   - **Opción 3**: "Ambos (ver e importar)" (importar y visualizar)
-4. Esperar mensaje: "✅ Importación completada: X registros importados"
-5. Los datos estarán disponibles en la tabla con filtros
+3. ✅ **¡Listo!** El sistema automáticamente:
+   - Detecta el tipo de proceso por el nombre de la hoja
+   - Identifica las columnas por sus nombres (no por posición)
+   - Crea nuevos clientes si no existen
+   - Importa todos los registros a la base de datos
+   - Muestra mensaje con total de registros importados
+   - Recarga los datos en la vista actual
 
-**Preparación del Excel:**
+**📊 Formato del Excel:**
 
-Debe tener hojas con nombres:
-- `AREQUIPA VIVO`
-- `PROVINCIAS VIVO`
-- `AREQUIPA BENEF`
-- `PROVINCIAS BENEF`
+**Nombres de Hojas** (detecta automáticamente):
+- Hojas que contengan **"VIVO" + "AREQUIPA"** → Vivo Arequipa
+- Hojas que contengan **"VIVO" + "PROVINCIA"** → Vivo Provincias  
+- Hojas que contengan **"BENEF" + "AREQUIPA"** → Beneficiado Arequipa
+- Hojas que contengan **"BENEF" + "PROVINCIA"** → Beneficiado Provincia
 
-**Estructura de Columnas:**
-```
-Columna 0: AÑO (2024)
-Columna 1: MES (ENERO, FEBRERO, SETIEMBRE, etc.)
-Columna 2: PROVINCIA (AREQUIPA, CAMANÁ, etc.)
-Columna 3: ZONA
-Columna 4: COMPRA GRS (SI/NO)
-Columna 5: TIPO DE CLIENTE
-Columna 6: NOMBRES (Cliente)
-Columna 7: GRS (cantidad)
-Columna 8: RP (cantidad)
-Columna 15/25: POTENCIAL MINIMO
-Columna 16/26: POTENCIAL MAXIMO
-Última columna: OBSERVACIONES
-```
+**Columnas Requeridas** (el sistema las detecta por nombre):
+- **AÑO** o **ANIO**: Año del registro (ej: 2024)
+- **MES**: Nombre o número del mes (ej: "Septiembre" o 9)
+- **CLIENTE**: Nombre del cliente
+- **TIPO CLIENTE**: Tipo (DISTRIBUIDOR, MAYORISTA, etc.)
+- **PROVINCIA**: Nombre de la provincia
+- **GRS** o **CANTIDAD GRS**: Cantidad en GRS
+- **RP** o **CANTIDAD RP**: Cantidad en RP
+- **POTENCIAL MINIMO**: Potencial mínimo
+- **POTENCIAL MAXIMO**: Potencial máximo
+
+**Columnas Opcionales:**
+- **ZONA**: Zona geográfica
+- **DISTRITO**: Distrito
+- **OBSERVACIONES**: Notas adicionales
+
+**✨ Ventajas del Nuevo Sistema:**
+- ✅ **Sin opciones**: No pregunta qué hacer, importa automáticamente
+- ✅ **Flexible**: Las columnas pueden estar en cualquier orden
+- ✅ **Inteligente**: Detecta columnas por palabras clave
+- ✅ **Completo**: Maneja múltiples hojas en un solo archivo
+- ✅ **Robusto**: Continúa importando aunque haya errores en filas individuales
+
+📖 **Ver [FORMATO_EXCEL.md](./FORMATO_EXCEL.md) para detalles completos**
 
 ### 4. Generar Reportes
 
@@ -293,12 +304,43 @@ Para reportar problemas o sugerencias, contactar al equipo de desarrollo.
 ---
 
 **Última actualización**: 2025-01-27
-**Versión**: 1.3.0
+**Versión**: 1.4.0
 **Estado**: ✅ Producción lista
 
 ---
 
-## 🎯 Cambios Recientes (v1.3.0)
+## 🎯 Cambios Recientes (v1.4.0)
+
+### 🚀 Importación Automática de Excel (NUEVO)
+
+1. **Importación 100% Automática**
+   - ✅ Sin menús ni opciones: Solo cargar y listo
+   - ✅ Detecta automáticamente el tipo de proceso por nombre de hoja
+   - ✅ Identifica columnas por palabras clave (no por posición)
+   - ✅ Importa todos los datos directamente a la base de datos
+
+2. **Mapeo Inteligente de Columnas**
+   - ✅ Las columnas pueden estar en cualquier orden
+   - ✅ Detecta por palabras clave: "AÑO", "MES", "CLIENTE", "GRS", "RP", etc.
+   - ✅ Flexible con variaciones: "ANIO"/"AÑO", "MINIMO"/"MÍNIMO", etc.
+
+3. **Selección de Filas por Clic**
+   - ✅ Eliminados checkboxes de selección
+   - ✅ Clic en cualquier fila para seleccionar/deseleccionar
+   - ✅ Feedback visual inmediato (fondo azul)
+   - ✅ Soporte para selección múltiple
+
+4. **Campo Provincia en Modal**
+   - ✅ Agregado campo Provincia en formulario de Nuevo/Modificar
+   - ✅ Carga automática de provincias disponibles
+
+5. **Botones de Proceso Reubicados**
+   - ✅ Movidos de sidebar derecho a debajo de filtros
+   - ✅ Layout responsive: 2 columnas en móvil, 4 en desktop
+
+---
+
+## 🎯 Cambios Anteriores (v1.3.0)
 
 ### 🆕 Nuevas Funcionalidades
 
