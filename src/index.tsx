@@ -1201,7 +1201,11 @@ app.get('/', (c) => {
                   registrosCargados++;
                   
                 } catch (error) {
-                  console.error(\`Error procesando fila \${i + 1} de hoja "\${sheetName}":\`, error);
+                  console.error(\`❌ Error fila \${i + 1} ["\${sheetName}"]:\`, error);
+                  console.error('Datos de la fila:', { clienteNombre, registro });
+                  if (error.response) {
+                    console.error('Respuesta del servidor:', error.response.data);
+                  }
                 }
               }
             }
