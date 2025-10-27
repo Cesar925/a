@@ -4,6 +4,7 @@ import { serveStatic } from 'hono/cloudflare-workers'
 import { VivoController } from './controllers/VivoController'
 import { BeneficiadoController } from './controllers/BeneficiadoController'
 import { CatalogoController } from './controllers/CatalogoController'
+import { ExportController } from './controllers/ExportController'
 import { Bindings } from './types'
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -26,6 +27,10 @@ app.put('/vivo/actualizar', VivoController.actualizar)
 app.delete('/vivo/borrar/:id', VivoController.borrar)
 app.get('/vivo/estadisticas', VivoController.getEstadisticas)
 
+// Exportar Excel Vivo
+app.get('/vivo/arequipa/excel', ExportController.exportarArequipaVivoExcel)
+app.get('/vivo/provincia/excel', ExportController.exportarProvinciaVivoExcel)
+
 // ==================== RUTAS BENEFICIADO ====================
 app.get('/beneficiado/all', BeneficiadoController.getAll)
 app.get('/beneficiado/arequipa', BeneficiadoController.getArequipa)
@@ -34,6 +39,10 @@ app.post('/beneficiado/crear', BeneficiadoController.crear)
 app.put('/beneficiado/actualizar', BeneficiadoController.actualizar)
 app.delete('/beneficiado/borrar/:id', BeneficiadoController.borrar)
 app.get('/beneficiado/estadisticas', BeneficiadoController.getEstadisticas)
+
+// Exportar Excel Beneficiado
+app.get('/beneficiado/arequipa/excel', ExportController.exportarArequipaExcel)
+app.get('/beneficiado/provincia/excel', ExportController.exportarProvinciaExcel)
 
 // ==================== RUTAS CATÁLOGOS ====================
 app.get('/catalogos/procesos', CatalogoController.getProcesos)
@@ -243,12 +252,11 @@ app.get('/', (c) => {
                                     <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Santa Angela</th>
                                     <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Jorge Pan</th>
                                     <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Pot. Min</th>
-                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-r border-gray-300">Pot. Max</th>
-                                    <th class="px-3 py-2 text-center text-xs font-semibold text-gray-700">Acciones</th>
+                                    <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700">Pot. Max</th>
                                 </tr>
                             </thead>
                             <tbody id="tabla-registros" class="bg-white divide-y divide-gray-200">
-                                <tr><td colspan="16" class="text-center py-8 text-gray-500">Cargando datos...</td></tr>
+                                <tr><td colspan="15" class="text-center py-8 text-gray-500">Cargando datos...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -611,7 +619,7 @@ app.get('/', (c) => {
             } catch (error) {
               console.error('Error cargando registros:', error);
               document.getElementById('tabla-registros').innerHTML = 
-                '<tr><td colspan="16" class="text-center py-8 text-red-500">Error al cargar datos</td></tr>';
+                '<tr><td colspan="15" class="text-center py-8 text-red-500">Error al cargar datos</td></tr>';
             }
           }
           
@@ -620,7 +628,7 @@ app.get('/', (c) => {
             const tbody = document.getElementById('tabla-registros');
             
             if (registros.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="16" class="text-center py-8 text-gray-500">No hay registros</td></tr>';
+              tbody.innerHTML = '<tr><td colspan="15" class="text-center py-8 text-gray-500">No hay registros</td></tr>';
               return;
             }
             
@@ -649,15 +657,7 @@ app.get('/', (c) => {
                   <td class="px-3 py-2 text-right text-purple-700 border-r border-gray-200">\${formatNumber(santaAngela)}</td>
                   <td class="px-3 py-2 text-right text-orange-700 border-r border-gray-200">\${formatNumber(jorgePan)}</td>
                   <td class="px-3 py-2 text-right text-gray-600 border-r border-gray-200">\${formatNumber(r.potencial_minimo)}</td>
-                  <td class="px-3 py-2 text-right text-gray-600 border-r border-gray-200">\${formatNumber(r.potencial_maximo)}</td>
-                  <td class="px-3 py-2 text-center">
-                    <button onclick="editarRegistro(\${r.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button onclick="eliminarRegistro(\${r.id})" class="text-red-600 hover:text-red-800" title="Eliminar">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </td>
+                  <td class="px-3 py-2 text-right text-gray-600">\${formatNumber(r.potencial_maximo)}</td>
                 </tr>
               \`;
             }).join('');
@@ -815,7 +815,7 @@ app.get('/', (c) => {
             }
           }
           
-          // Generar reporte Excel
+          // Generar reporte Excel (usa endpoint de exportación)
           async function generarReporte() {
             try {
               if (registrosActuales.length === 0) {
@@ -823,11 +823,36 @@ app.get('/', (c) => {
                 return;
               }
               
+              // Determinar endpoint según proceso actual
+              let urlExport = '';
+              if (procesoActual.tipo === 'vivo-arequipa') {
+                urlExport = '/vivo/arequipa/excel';
+              } else if (procesoActual.tipo === 'vivo-provincia') {
+                urlExport = '/vivo/provincia/excel';
+              } else if (procesoActual.tipo === 'beneficiado-arequipa') {
+                urlExport = '/beneficiado/arequipa/excel';
+              } else if (procesoActual.tipo === 'beneficiado-provincia') {
+                urlExport = '/beneficiado/provincia/excel';
+              }
+              
+              // Obtener datos desde el backend
+              let datosParaExcel = registrosActuales;
+              if (urlExport) {
+                try {
+                  const response = await axios.get(urlExport);
+                  if (response.data && response.data.length > 0) {
+                    datosParaExcel = response.data;
+                  }
+                } catch (error) {
+                  console.warn('No se pudo obtener datos del endpoint, usando datos locales:', error);
+                }
+              }
+              
               // Crear libro de trabajo
               const wb = XLSX.utils.book_new();
               
               // Preparar datos para exportar
-              const datosExportar = registrosActuales.map(r => ({
+              const datosExportar = datosParaExcel.map(r => ({
                 'ID': r.id,
                 'Cliente': r.cliente_nombre || '-',
                 'Año': r.anio,
@@ -946,9 +971,14 @@ app.get('/', (c) => {
               let registrosCargados = 0;
               
               if (opcion === '2' || opcion === '3') {
-                registrosCargados = await cargarDatosDesdeExcel(workbook);
-                await cargarRegistros();
-                alert('✅ Importación completada: ' + registrosCargados + ' registros importados');
+                try {
+                  registrosCargados = await cargarDatosDesdeExcelAPI(workbook);
+                  await cargarRegistros();
+                  alert('✅ Importación completada: ' + registrosCargados + ' registros importados');
+                } catch (error) {
+                  console.error('Error importando datos:', error);
+                  alert('❌ Error al importar datos: ' + error.message);
+                }
               }
               
               if (opcion === '1' || opcion === '3') {
@@ -1070,8 +1100,8 @@ app.get('/', (c) => {
             cargarRegistros();
           }
           
-          // Cargar datos desde Excel a la base de datos
-          async function cargarDatosDesdeExcel(workbook) {
+          // Cargar datos desde Excel a la base de datos vía API
+          async function cargarDatosDesdeExcelAPI(workbook) {
             const sheetNames = workbook.SheetNames;
             let registrosCargados = 0;
             
@@ -1081,14 +1111,20 @@ app.get('/', (c) => {
               
               // Determinar el tipo de proceso según el nombre de la hoja
               let proceso_id = 0;
-              if (sheetName.includes('AREQUIPA VIVO')) {
+              let url = '';
+              
+              if (sheetName.toUpperCase().includes('AREQUIPA') && sheetName.toUpperCase().includes('VIVO')) {
                 proceso_id = 1;
-              } else if (sheetName.includes('PROVINCIAS VIVO')) {
+                url = '/vivo/crear';
+              } else if (sheetName.toUpperCase().includes('PROVINCIA') && sheetName.toUpperCase().includes('VIVO')) {
                 proceso_id = 2;
-              } else if (sheetName.includes('AREQUIPA BENEF')) {
+                url = '/vivo/crear';
+              } else if (sheetName.toUpperCase().includes('AREQUIPA') && sheetName.toUpperCase().includes('BENEF')) {
                 proceso_id = 3;
-              } else if (sheetName.includes('PROVINCIAS BENEF')) {
+                url = '/beneficiado/crear';
+              } else if (sheetName.toUpperCase().includes('PROVINCIA') && sheetName.toUpperCase().includes('BENEF')) {
                 proceso_id = 4;
+                url = '/beneficiado/crear';
               }
               
               if (proceso_id === 0) continue;
@@ -1133,8 +1169,7 @@ app.get('/', (c) => {
                     observaciones: String(row[row.length - 1] || '')
                   };
                   
-                  // Crear registro
-                  const url = proceso_id <= 2 ? '/vivo/crear' : '/beneficiado/crear';
+                  // Crear registro vía API
                   await axios.post(url, registro);
                   registrosCargados++;
                   
