@@ -1,0 +1,70 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║         SISTEMA DE GESTION - INSTALACION WINDOWS             ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📋 REQUISITOS:
+   ✓ Node.js versión 18 o superior
+     Descargar: https://nodejs.org/
+
+═══════════════════════════════════════════════════════════════
+
+🚀 INSTALACION RAPIDA (3 PASOS):
+
+   1. Doble clic en:  instalar.bat
+   
+   2. Esperar a que termine (2-3 minutos)
+   
+   3. Doble clic en:  ejecutar.bat
+
+   4. Abrir navegador: http://localhost:8080
+
+═══════════════════════════════════════════════════════════════
+
+🔧 INSTALACION MANUAL (Si los .bat no funcionan):
+
+   1. Abrir PowerShell en esta carpeta
+   
+   2. Ejecutar comandos:
+   
+      npm install
+      npm run build
+      npx wrangler pages dev dist --port 8080
+   
+   3. Abrir: http://localhost:8080
+
+═══════════════════════════════════════════════════════════════
+
+⚠️  PROBLEMAS COMUNES:
+
+   ❌ "Node.js no esta instalado"
+      → Instalar desde: https://nodejs.org/
+      
+   ❌ "Puerto 8080 ocupado"
+      → Cambiar puerto:
+        npx wrangler pages dev dist --port 3000
+      
+   ❌ "Error 404 Not Found"
+      → Ejecutar primero:
+        npm run build
+        
+   ❌ Scripts de PowerShell bloqueados
+      → Ejecutar PowerShell como Administrador:
+        Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+═══════════════════════════════════════════════════════════════
+
+📚 DOCUMENTACION COMPLETA:
+
+   • INICIO_RAPIDO.md       - Guía rápida
+   • INSTALACION_WINDOWS.md - Guía detallada
+   • DEBUG_IMPORTACION.md   - Depurar errores
+   • README.md              - Documentación completa
+
+═══════════════════════════════════════════════════════════════
+
+🆘 AYUDA:
+   GitHub: https://github.com/Cesar925/a
+
+═══════════════════════════════════════════════════════════════
