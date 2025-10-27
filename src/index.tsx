@@ -90,7 +90,7 @@ app.get('/', (c) => {
             backdrop-filter: blur(4px);
           }
           .modal-content { 
-            @apply bg-white rounded-2xl p-6 md:p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl;
+            @apply bg-white rounded-2xl p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl;
             animation: modalSlideIn 0.3s ease-out;
           }
           @keyframes modalSlideIn {
@@ -232,8 +232,8 @@ app.get('/', (c) => {
                     </div>
 
                     <!-- Tabla de registros con diseño mejorado -->
-                    <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                        <table class="w-full text-sm">
+                    <div class="overflow-x-auto border border-gray-300 rounded-lg" style="max-height: 500px; overflow-y: auto;">
+                        <table class="min-w-full text-sm" style="table-layout: fixed; width: 1600px;">
                             <thead>
                                 <tr class="bg-gray-100 border-b-2 border-gray-300">
                                     <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">
@@ -397,19 +397,19 @@ app.get('/', (c) => {
         <div id="modal-formulario" class="modal hidden">
             <div class="modal-content mx-auto">
                 <!-- Header del modal -->
-                <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-edit text-white"></i>
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-edit text-white text-sm"></i>
                         </div>
-                        <h3 id="titulo-modal" class="text-xl md:text-2xl font-bold text-gray-800"></h3>
+                        <h3 id="titulo-modal" class="text-lg md:text-xl font-bold text-gray-800"></h3>
                     </div>
                     <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600 transition p-2 hover:bg-gray-100 rounded-lg">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
 
-                <form id="formulario-registro" class="space-y-5">
+                <form id="formulario-registro" class="space-y-4">
                     <input type="hidden" id="form-id">
                     
                     <!-- Sección: Información Básica -->
@@ -603,6 +603,8 @@ app.get('/', (c) => {
             } else if (procesoActual.tipo === 'beneficiado-provincia') {
               url = '/beneficiado/provincia';
             }
+            
+            console.log('Cargando registros desde:', url, 'proceso:', procesoActual);
             
             url += '?' + params.toString();
             
