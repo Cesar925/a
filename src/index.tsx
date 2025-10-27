@@ -76,8 +76,24 @@ app.get('/', (c) => {
           .table { @apply min-w-full divide-y divide-gray-200; }
           .table th { @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50; }
           .table td { @apply px-6 py-4 text-sm text-gray-900; }
-          .modal { @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4; }
-          .modal-content { @apply bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl; }
+          .modal { 
+            @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+            backdrop-filter: blur(4px);
+          }
+          .modal-content { 
+            @apply bg-white rounded-2xl p-6 md:p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl;
+            animation: modalSlideIn 0.3s ease-out;
+          }
+          @keyframes modalSlideIn {
+            from {
+              opacity: 0;
+              transform: translateY(-20px) scale(0.95);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
           .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -371,18 +387,30 @@ app.get('/', (c) => {
 
         <!-- Modal Formulario -->
         <div id="modal-formulario" class="modal hidden">
-            <div class="modal-content">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 id="titulo-modal" class="text-2xl font-bold"></h3>
-                    <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-2xl"></i>
+            <div class="modal-content mx-auto">
+                <!-- Header del modal -->
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-edit text-white"></i>
+                        </div>
+                        <h3 id="titulo-modal" class="text-xl md:text-2xl font-bold text-gray-800"></h3>
+                    </div>
+                    <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600 transition p-2 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
 
-                <form id="formulario-registro" class="space-y-4">
+                <form id="formulario-registro" class="space-y-5">
                     <input type="hidden" id="form-id">
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Sección: Información Básica -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                            Información Básica
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-1">Cliente *</label>
                             <select id="form-cliente" class="select" required>
@@ -410,38 +438,62 @@ app.get('/', (c) => {
                                 <option value="12">Diciembre</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Provincia</label>
-                            <select id="form-provincia" class="select">
-                                <option value="">Seleccionar...</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Cantidad GRS</label>
-                            <input type="number" id="form-grs" class="input" step="0.01" value="0">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Cantidad RP</label>
-                            <input type="number" id="form-rp" class="input" step="0.01" value="0">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Potencial Mínimo</label>
-                            <input type="number" id="form-pot-min" class="input" step="0.01" value="0">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Potencial Máximo</label>
-                            <input type="number" id="form-pot-max" class="input" step="0.01" value="0">
                         </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Observaciones</label>
-                        <textarea id="form-obs" class="input" rows="3"></textarea>
+                    <!-- Sección: Cantidades -->
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <i class="fas fa-calculator mr-2 text-green-600"></i>
+                            Cantidades
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1 text-gray-700">Cantidad GRS</label>
+                                <input type="number" id="form-grs" class="input" step="0.01" value="0" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1 text-gray-700">Cantidad RP</label>
+                                <input type="number" id="form-rp" class="input" step="0.01" value="0" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sección: Potenciales -->
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <i class="fas fa-chart-line mr-2 text-purple-600"></i>
+                            Potenciales
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1 text-gray-700">Potencial Mínimo</label>
+                                <input type="number" id="form-pot-min" class="input" step="0.01" value="0" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1 text-gray-700">Potencial Máximo</label>
+                                <input type="number" id="form-pot-max" class="input" step="0.01" value="0" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sección: Observaciones -->
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <i class="fas fa-sticky-note mr-2 text-yellow-600"></i>
+                            Observaciones
+                        </h4>
+                        <textarea id="form-obs" class="input" rows="3" placeholder="Ingrese observaciones adicionales..."></textarea>
                     </div>
 
-                    <div class="flex gap-4 justify-end pt-4">
-                        <button type="button" onclick="cerrarModal()" class="btn btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Guardar</button>
+                    <!-- Botones de acción -->
+                    <div class="flex flex-col sm:flex-row gap-3 justify-end pt-4 border-t border-gray-200">
+                        <button type="button" onclick="cerrarModal()" class="btn btn-secondary order-2 sm:order-1">
+                            <i class="fas fa-times mr-2"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success order-1 sm:order-2">
+                            <i class="fas fa-save mr-2"></i>Guardar
+                        </button>
                     </div>
                 </form>
             </div>
