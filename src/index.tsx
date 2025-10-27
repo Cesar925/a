@@ -985,7 +985,7 @@ app.get('/', (c) => {
             const textoOriginal = btnCargar ? btnCargar.innerHTML : '';
             if (btnCargar) {
               btnCargar.disabled = true;
-              btnCargar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cargando...';
+              btnCargar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Importando...';
             }
             
             try {
@@ -993,46 +993,17 @@ app.get('/', (c) => {
               const workbook = XLSX.read(data, { type: 'array' });
               excelCargado = workbook;
               
-              const opciones = '1. Ver datos del Excel hoja por hoja\\n2. Importar datos a la base de datos\\n3. Ambos (ver e importar)\\n\\nIngrese 1, 2 o 3:';
-              const opcion = prompt('¿Qué desea hacer con el archivo Excel?\\n\\n' + opciones);
-              
-              if (!opcion || !['1', '2', '3'].includes(opcion.trim())) {
-                alert('Operación cancelada');
-                event.target.value = '';
-                return;
-              }
-              
+              // Importar automáticamente a la base de datos
               let registrosCargados = 0;
-              
-              if (opcion === '2' || opcion === '3') {
-                try {
-                  registrosCargados = await cargarDatosDesdeExcelAPI(workbook);
-                  await cargarRegistros();
-                  alert('✅ Importación completada: ' + registrosCargados + ' registros importados');
-                } catch (error) {
-                  console.error('Error importando datos:', error);
-                  alert('❌ Error al importar datos: ' + error.message);
-                }
-              }
-              
-              if (opcion === '1' || opcion === '3') {
-                mostrarVisualizadorExcel(file.name);
-              }
-              
-              const sheetNames = workbook.SheetNames;
-              let datosResumen = {};
-              sheetNames.forEach(sheetName => {
-                const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                if (sheetName.includes('RESUMEN') || sheetName.includes('Resumen')) {
-                  datosResumen = procesarHojaResumen(jsonData);
-                }
-              });
-              datosExcel = datosResumen;
-              document.getElementById('info-archivo').textContent = file.name + ' - ' + new Date().toLocaleString('es-PE');
-              
-              if (Object.keys(datosResumen).length > 0 && datosResumen.provincias) {
-                mostrarDashboard();
+              try {
+                registrosCargados = await cargarDatosDesdeExcelAPI(workbook);
+                await cargarRegistros();
+                alert('✅ Importación completada exitosamente\\n\\n' + 
+                      '📊 Total de registros importados: ' + registrosCargados + '\\n\\n' +
+                      'Los datos ya están disponibles en todos los procesos.');
+              } catch (error) {
+                console.error('Error importando datos:', error);
+                alert('❌ Error al importar datos: ' + error.message);
               }
               
               event.target.value = '';
@@ -1143,40 +1114,62 @@ app.get('/', (c) => {
               const sheet = workbook.Sheets[sheetName];
               const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
               
+              // Saltar hojas sin datos o de resumen
+              if (jsonData.length < 2 || sheetName.toUpperCase().includes('RESUMEN')) continue;
+              
               // Determinar el tipo de proceso según el nombre de la hoja
               let proceso_id = 0;
               let url = '';
               
-              if (sheetName.toUpperCase().includes('AREQUIPA') && sheetName.toUpperCase().includes('VIVO')) {
+              const sheetUpper = sheetName.toUpperCase();
+              if (sheetUpper.includes('VIVO') && sheetUpper.includes('AREQUIPA')) {
                 proceso_id = 1;
                 url = '/vivo/crear';
-              } else if (sheetName.toUpperCase().includes('PROVINCIA') && sheetName.toUpperCase().includes('VIVO')) {
+              } else if (sheetUpper.includes('VIVO') && sheetUpper.includes('PROVINCIA')) {
                 proceso_id = 2;
                 url = '/vivo/crear';
-              } else if (sheetName.toUpperCase().includes('AREQUIPA') && sheetName.toUpperCase().includes('BENEF')) {
+              } else if (sheetUpper.includes('BENEF') && sheetUpper.includes('AREQUIPA')) {
                 proceso_id = 3;
                 url = '/beneficiado/crear';
-              } else if (sheetName.toUpperCase().includes('PROVINCIA') && sheetName.toUpperCase().includes('BENEF')) {
+              } else if (sheetUpper.includes('BENEF') && sheetUpper.includes('PROVINCIA')) {
                 proceso_id = 4;
                 url = '/beneficiado/crear';
               }
               
               if (proceso_id === 0) continue;
               
-              // Procesar filas (saltar la primera que es encabezado)
+              // Obtener encabezados y crear mapa de columnas
+              const headers = jsonData[0].map(h => String(h || '').toUpperCase().trim());
+              const colMap = {};
+              headers.forEach((h, idx) => {
+                if (h.includes('AÑO') || h.includes('ANIO')) colMap.anio = idx;
+                else if (h.includes('MES')) colMap.mes = idx;
+                else if (h.includes('PROVINCIA')) colMap.provincia = idx;
+                else if (h.includes('ZONA')) colMap.zona = idx;
+                else if (h.includes('DISTRITO')) colMap.distrito = idx;
+                else if (h.includes('TIPO') && h.includes('CLIENTE')) colMap.tipo_cliente = idx;
+                else if (h.includes('CLIENTE') && !h.includes('TIPO')) colMap.cliente = idx;
+                else if (h.includes('GRS') || h.includes('CANTIDAD') && h.includes('GRS')) colMap.cantidad_grs = idx;
+                else if (h.includes('RP') || h.includes('CANTIDAD') && h.includes('RP')) colMap.cantidad_rp = idx;
+                else if (h.includes('POTENCIAL') && (h.includes('MIN') || h.includes('MÍNIMO'))) colMap.pot_min = idx;
+                else if (h.includes('POTENCIAL') && (h.includes('MAX') || h.includes('MÁXIMO'))) colMap.pot_max = idx;
+                else if (h.includes('OBSERV')) colMap.observaciones = idx;
+              });
+              
+              // Procesar filas de datos (saltar encabezado)
               for (let i = 1; i < jsonData.length; i++) {
                 const row = jsonData[i];
-                if (!row[0]) continue; // Saltar filas vacías
+                if (!row || row.every(cell => !cell)) continue; // Saltar filas completamente vacías
                 
                 try {
                   // Buscar o crear cliente
-                  const clienteNombre = String(row[6] || '').trim();
+                  const clienteNombre = String(row[colMap.cliente] || '').trim();
                   if (!clienteNombre) continue;
                   
                   let cliente = catalogos.clientes.find(c => c.nombre.toUpperCase() === clienteNombre.toUpperCase());
                   if (!cliente) {
                     // Crear nuevo cliente
-                    const tipo_cliente = String(row[5] || 'OTROS');
+                    const tipo_cliente = String(row[colMap.tipo_cliente] || 'OTROS').toUpperCase();
                     const nuevoCliente = await axios.post('/catalogos/clientes', {
                       nombre: clienteNombre,
                       tipo: tipo_cliente
@@ -1186,21 +1179,21 @@ app.get('/', (c) => {
                   }
                   
                   // Buscar provincia
-                  const provinciaNombre = String(row[2] || '').trim().toUpperCase();
+                  const provinciaNombre = String(row[colMap.provincia] || '').trim().toUpperCase();
                   const provincia = catalogos.provincias.find(p => p.nombre.toUpperCase() === provinciaNombre);
                   
                   // Preparar datos del registro
                   const registro = {
                     proceso_id: proceso_id,
                     cliente_id: cliente.id,
-                    anio: parseInt(row[0]) || new Date().getFullYear(),
-                    mes: obtenerNumeroMes(row[1]),
+                    anio: parseInt(row[colMap.anio]) || new Date().getFullYear(),
+                    mes: obtenerNumeroMes(row[colMap.mes]),
                     provincia_id: provincia ? provincia.id : null,
-                    cantidad_grs: parseFloat(row[7]) || 0,
-                    cantidad_rp: parseFloat(row[8]) || 0,
-                    potencial_minimo: parseFloat(row[proceso_id <= 2 ? 15 : 25]) || 0,
-                    potencial_maximo: parseFloat(row[proceso_id <= 2 ? 16 : 26]) || 0,
-                    observaciones: String(row[row.length - 1] || '')
+                    cantidad_grs: parseFloat(row[colMap.cantidad_grs]) || 0,
+                    cantidad_rp: parseFloat(row[colMap.cantidad_rp]) || 0,
+                    potencial_minimo: parseFloat(row[colMap.pot_min]) || 0,
+                    potencial_maximo: parseFloat(row[colMap.pot_max]) || 0,
+                    observaciones: String(row[colMap.observaciones] || '')
                   };
                   
                   // Crear registro vía API
@@ -1208,7 +1201,7 @@ app.get('/', (c) => {
                   registrosCargados++;
                   
                 } catch (error) {
-                  console.error('Error procesando fila ' + (i + 1) + ':', error);
+                  console.error(\`Error procesando fila \${i + 1} de hoja "\${sheetName}":\`, error);
                 }
               }
             }
